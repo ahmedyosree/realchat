@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "905066560747",
+    "project_id": "realchat-89c04",
+    "storage_bucket": "realchat-89c04.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905066560747:android:3eaf0d527e595039f192ae",
+        "android_client_info": {
+          "package_name": "com.example.realchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905066560747-n162ck687bevgerbh9kh4kpos4cnsm5h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.realchat",
+            "certificate_hash": "3dde587369142212b9c67563523377a9f198f28c"
+          }
+        },
+        {
+          "client_id": "905066560747-bj0234iauirn555jdrinvmuesmfbf7ss.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2HQxCAWmRzCtxRUSHPgzA4b2nizdTiXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905066560747-bj0234iauirn555jdrinvmuesmfbf7ss.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "905066560747-4cqu2eq078bcguae4j208ank60ik1jua.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.realchat"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

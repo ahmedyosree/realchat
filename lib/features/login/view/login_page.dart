@@ -52,17 +52,18 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
+            context.go('/home');
+
             if (state.welcomeMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.welcomeMessage!)),
               );
             }
-            // Add slight delay for better UX
-            Future.delayed(const Duration(milliseconds: 500), () {
-              context.go('/home');
-            });
+
+
           }
           if (state is AuthFailure) {
+            debugPrint("AuthFailure message: ${state.message}");
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
@@ -228,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () {
                                 // Add sign up navigation
                                 context.go('/SignUp');
-                                print("hhhh");
+
                               },
                               child: Text(
                                 'Sign Up',

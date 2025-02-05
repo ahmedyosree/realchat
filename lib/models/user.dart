@@ -18,14 +18,16 @@ class UserModel {
     required this.friends,
   });
 
-  /// Converts a Firebase document (Map) to a User object
+  /// Factory constructor to create UserModel from a map
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'] as String,
       email: map['email'] as String,
       name: map['name'] as String,
       nickname: map['nickname'] as String,
-      signInTime: (map['signInTime'] as Timestamp).toDate(),
+      signInTime: map['signInTime'] is Timestamp
+          ? (map['signInTime'] as Timestamp).toDate()
+          : DateTime.parse(map['signInTime']),
       friends: List<String>.from(map['friends'] ?? []),
     );
   }

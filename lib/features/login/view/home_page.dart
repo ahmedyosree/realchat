@@ -13,8 +13,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoggedOut) {
-          // Use go() instead of push() to clear navigation stack
+        if (state is AuthInitial) {
+
           context.go('/login');
         }
       },

@@ -1,6 +1,10 @@
+import 'package:equatable/equatable.dart';
 import '../../../models/user.dart';
 
-abstract class AuthState {}
+abstract class AuthState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 class AuthInitial extends AuthState {}
 
@@ -11,12 +15,17 @@ class AuthSuccess extends AuthState {
   final String? welcomeMessage;
 
   AuthSuccess(this.user, {this.welcomeMessage});
+
+  @override
+  List<Object?> get props => [user, welcomeMessage];
 }
 
 class AuthFailure extends AuthState {
   final String message;
 
   AuthFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
-class AuthLoggedOut extends AuthState {}

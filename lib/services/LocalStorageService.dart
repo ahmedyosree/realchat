@@ -1,7 +1,8 @@
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user.dart';
+
+import '../core/models/user.dart';
 
 /// Service for local storage (SharedPreferences)
 class LocalStorageService {

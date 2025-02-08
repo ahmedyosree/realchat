@@ -1,11 +1,11 @@
 
 import 'package:flutter/cupertino.dart';
-import '../models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../core/exceptions/auth_exception.dart';
-import 'LocalStorageService.dart';
-import 'firebase_service.dart';
+import '../../../../core/exceptions/auth_exception.dart';
+import '../../../../core/models/user.dart';
+import '../../../../services/LocalStorageService.dart';
+import '../../../../services/firebase_service.dart';
 
 /// Authentication repository
 class AuthenticationRepository {

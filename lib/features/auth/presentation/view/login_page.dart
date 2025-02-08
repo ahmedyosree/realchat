@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
+
+import '../../logic/bloc/auth_bloc.dart';
+import '../../logic/bloc/auth_event.dart';
+import '../../logic/bloc/auth_state.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

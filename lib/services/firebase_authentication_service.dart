@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class FirebaseService {
+class FirebaseAuthService {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
 
-  FirebaseService({
+  FirebaseAuthService({
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
@@ -51,5 +51,4 @@ class FirebaseService {
     await _googleSignIn.signOut();
   }
 
-  User? getCurrentUser() => _firebaseAuth.currentUser;
 }

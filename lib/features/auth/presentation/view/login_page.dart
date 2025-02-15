@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/widgets/auth_button.dart';
+import '../../../../core/constants/widgets/auth_text_field.dart';
+import '../../../../core/constants/widgets/social_login_button.dart';
 import '../../logic/bloc/auth_bloc.dart';
 import '../../logic/bloc/auth_event.dart';
 import '../../logic/bloc/auth_state.dart';
@@ -22,15 +25,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final Color _primaryColor = const Color(0xFFFFEBEE);
-  final Color _accentColor = const Color(0xFFEF9A9A);
-  final Color _buttonColor = const Color(0xFFEF5350);
-
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-
     super.dispose();
   }
 
@@ -40,11 +38,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: _primaryColor,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.language, color: _buttonColor),
+            icon: const Icon(Icons.language, color: AppColors.button),
             onPressed: () {
               // Add language change functionality
             },
@@ -53,24 +51,30 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
-            context.go('/home');
+      if (state is AuthSuccess) {
+        context.go('/home');
 
-            if (state.welcomeMessage != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.welcomeMessage!)),
-              );
-            }
+        if (state.welcomeMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.welcomeMessage!)),
+          );
+        }
 
 
-          }
-          if (state is AuthFailure) {
-            debugPrint("AuthFailure message: ${state.message}");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
+      }
+      if (state is AddInfo) {
+        print ("  context.go('/addinfo')");
+        context.go('/addinfo');
+
+      }
+      if (state is AuthFailure) {
+        debugPrint("AuthFailure message: ${state.message}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.message)),
+        );
+      }
+    },
+
         builder: (context, state) {
           if (state is AuthLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -89,61 +93,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 40),
-                        Icon(Icons.lock, size: 80, color: _buttonColor),
-                        const SizedBox(height: 40),
-                        TextFormField(
+                        const SizedBox(height: 20),
+                        const Icon(Icons.lock, size: 80, color: AppColors.button),
+                        const SizedBox(height: 20),
+                        CustomTextFormField(
                           controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email, color: _accentColor),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: _buttonColor),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            return null;
-                          },
+                          label: 'Email',
+                          icon: Icons.email,
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter your email'
+                              : null,
                         ),
                         const SizedBox(height: 20),
-                        TextFormField(
+                        CustomTextFormField(
                           controller: _passwordController,
+                          label: 'Password',
+                          icon: Icons.lock,
+                          isPassword: true,
                           obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(Icons.lock, color: _accentColor),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: _accentColor,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: _buttonColor),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            return null;
-                          },
+                          onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                          validator: (value) => value?.isEmpty ?? true
+                              ? 'Please enter your password'
+                              : null,
                         ),
                         const SizedBox(height: 10),
                         Align(
@@ -154,19 +125,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: Text(
                               'Forgot Password?',
-                              style: TextStyle(color: _buttonColor),
+                              style: TextStyle(color: AppColors.button),
                             ),
                           ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _buttonColor,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                        AuthButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               context.read<AuthBloc>().add(
@@ -177,16 +141,26 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             }
                           },
-                          child: const Text(
-                            'LOGIN',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                          text: 'LOGIN',
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Don't have an account?"),
+                            TextButton(
+                              onPressed: () => context.push('/signup'),
+                              child: Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.button,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
                         if (isLargeScreen)
                           const Row(
                             children: [
@@ -201,48 +175,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         else
                           const Divider(),
                         const SizedBox(height: 20),
-                        OutlinedButton.icon(
-                          icon: FaIcon(
-                            FontAwesomeIcons.google,
-                            color: _accentColor,
-                            size: 24,
-                          ),
-                          label: Text(
-                            'Sign in with Google',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            side: BorderSide(color: _accentColor),
-                          ),
-                          onPressed: () {
-                            context.read<AuthBloc>().add(SignInWithGoogleEvent());
-                          },
+                        GoogleSignInButton(
+                          onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleEvent()),
                         ),
                         const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("Don't have an account?"),
-                            TextButton(
-                              onPressed: () {
-                                // Add sign up navigation
-                                context.go('/SignUp');
-
-                              },
-                              child: Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: _buttonColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),

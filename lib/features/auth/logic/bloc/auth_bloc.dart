@@ -48,8 +48,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       emit(AuthSuccess(user!, welcomeMessage: 'Welcome, ${user.email}!'));
     } on AuthException catch (e) {
+
       emit(RegisterFailure(e.message));
     } catch (e) {
+
       emit(RegisterFailure('Registration failed. Please try again.'));
     }
   }

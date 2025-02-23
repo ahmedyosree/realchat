@@ -10,8 +10,6 @@ import '../../../../core/constants/widgets/social_login_button.dart';
 import '../../logic/bloc/auth_bloc.dart';
 import '../../logic/bloc/auth_event.dart';
 import '../../logic/bloc/auth_state.dart';
-
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -32,6 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final bool isLargeScreen = MediaQuery.of(context).size.width > 600;
@@ -49,40 +49,41 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      body: BlocConsumer<AuthBloc, AuthState>(
+      body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-      if (state is AuthSuccess) {
-        context.go('/home');
-
-        if (state.welcomeMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.welcomeMessage!)),
-          );
-        }
-
-
-      }
-      if (state is AddInfo) {
-        print ("  context.go('/addinfo')");
-        context.go('/addinfo');
-
-      }
-      if (state is AuthFailure) {
-        debugPrint("AuthFailure message: ${state.message}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.message)),
-        );
-      }
-    },
-
-        builder: (context, state) {
+          print("5");
           if (state is AuthLoading) {
-            return const Center(child: CircularProgressIndicator());
+            print("6");
+            context.push('/');
           }
 
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle.light,
-            child: SingleChildScrollView(
+          if (state is AuthSuccess) {
+            print("7");
+            context.go('/home');
+            if (state.welcomeMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.welcomeMessage!)),
+              );
+            }
+          } else if (state is AddInfo) {
+            print("8");
+            context.push('/addinfo');
+
+          }
+          else if (state is AuthFailure) {
+            print("9");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }else if (state is AuthInitial) {
+            print("9.5");
+            context.go('/login');
+          }
+        },
+
+        child: Stack(
+          children: [
+            SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Center(
                 child: Container(
@@ -176,7 +177,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Divider(),
                         const SizedBox(height: 20),
                         GoogleSignInButton(
-                          onPressed: () => context.read<AuthBloc>().add(SignInWithGoogleEvent()),
+                          onPressed: () {
+                            context.read<AuthBloc>().add(SignInWithGoogleEvent());
+                          },
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -185,9 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
 }
+

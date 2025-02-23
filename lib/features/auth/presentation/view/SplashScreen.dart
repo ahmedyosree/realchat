@@ -11,17 +11,29 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
+        print("1");
         if (state is AuthSuccess) {
-          // Use replace instead of go to prevent back navigation to splash
-          context.replace('/home');
+          print("whaaaart");
+          print("2");
+          context.go('/home');
         } else if (state is AuthFailure) {
-          context.replace('/login');
-          // Optionally show error message
+          print("3");
+          context.go('/login');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
         } else if (state is AuthInitial) {
-          context.replace('/login');
+          print("4");
+          context.go('/login');
+        }
+        else if (state is RegisterFailure) {
+          print("4.5");
+          context.go('/login');
+
+          context.push('/signup');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
         }
         // Don't navigate if state is Loading or Initial
       },

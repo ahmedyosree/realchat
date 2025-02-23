@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../../services/firebase_firestore.dart';
+import '../../../../services/firebase_firestore_user_service.dart';
 import '../../../../core/exceptions/auth_exception.dart';
 import '../../../../core/models/user.dart';
-import '../../../../services/LocalStorageService.dart';
-import '../../../../services/firebase_authentication_service.dart';
+import '../services/local_storage_service.dart';
+import '../services/firebase_authentication_service.dart';
 
 /// A wrapper class to store Google sign-in results.
 /// It contains either a Firebase [User] or a [UserModel] from Firestore.
@@ -18,14 +18,14 @@ class GoogleSignInResult {
 /// Authentication repository responsible for handling user authentication,
 /// registration, and session management.
 class AuthenticationRepository {
+
   final FirebaseAuthService _firebaseAuthService;
   final LocalStorageService _localStorageService;
-  final FireStoreService _fireStoreService;
-
+  final FireStoreUserService _fireStoreService;
   AuthenticationRepository({
     required FirebaseAuthService firebaseAuthService,
     required LocalStorageService localStorageService,
-    required FireStoreService fireStoreService,
+    required FireStoreUserService fireStoreService,
   })  : _firebaseAuthService = firebaseAuthService,
         _localStorageService = localStorageService,
         _fireStoreService = fireStoreService;
@@ -39,7 +39,7 @@ class AuthenticationRepository {
       if (firebaseUser == null) return null;
 
       final docSnapshot = await _fireStoreService.getDocument(
-        collectionPath: 'users',
+
         docId: firebaseUser.uid,
       );
 
@@ -56,6 +56,16 @@ class AuthenticationRepository {
   Future<UserModel?> registerWithEmail(
       String email, String password, String name, String nickname) async {
     try {
+
+// Check if the nickname already exists
+      final bool nicknameExists =
+      await _fireStoreService.doesNicknameExist(nickname);
+      if (nicknameExists) {
+        print("Nickname already existssssss");
+
+        throw AuthException("Nickname already exists , try another one", "nickname-already-in-use");
+      }
+
       final User? firebaseUser =
           await _firebaseAuthService.registerWithEmail(email, password);
       if (firebaseUser == null) return null;
@@ -70,7 +80,7 @@ class AuthenticationRepository {
       );
 
       await _fireStoreService.setDocument(
-        collectionPath: 'users',
+
         docId: user.id,
         data: user.toMap(),
       );
@@ -85,6 +95,15 @@ class AuthenticationRepository {
   Future<UserModel?> registerWithGoogle(
       User? firebaseUser, String name, String nickname) async {
     try {
+
+      // Check if the nickname already exists
+      final bool nicknameExists =
+      await _fireStoreService.doesNicknameExist(nickname);
+      if (nicknameExists) {
+        print("Nickname already exists");
+        throw AuthException("Nickname already exists , try another one", "nickname-already-in-use");
+      }
+
       UserModel user;
       user = UserModel(
         id: firebaseUser!.uid,
@@ -95,7 +114,7 @@ class AuthenticationRepository {
         friends: [],
       );
       await _fireStoreService.setDocument(
-        collectionPath: 'users',
+
         docId: user.id,
         data: user.toMap(),
       );
@@ -114,7 +133,7 @@ class AuthenticationRepository {
       if (firebaseUser == null) return null; // User canceled sign-in
 
       final docSnapshot = await _fireStoreService.getDocument(
-        collectionPath: 'users',
+
         docId: firebaseUser.uid,
       );
 

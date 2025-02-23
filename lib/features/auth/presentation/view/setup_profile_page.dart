@@ -25,12 +25,14 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       listener: (context, state) {
         if (state is AuthSuccess) {
           Navigator.pushReplacementNamed(context, '/home');
+          print("10");
         } else if (state is AuthFailure) {
+          print("11");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
         } else if (state is AuthInitial) {
-          print(",,,,,,,,,,,,,,,,,,,,,,,");
+          print("12");
           context.go('/login');
         }
       },
@@ -162,6 +164,15 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     if (name.isEmpty || nickname.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter all fields')),
+      );
+      return;
+    }
+    final nicknameRegex = RegExp(r'^[A-Za-z0-9_]+$');
+    if (!nicknameRegex.hasMatch(nickname)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nickname can only contain letters, numbers, and underscores.'),
+        ),
       );
       return;
     }

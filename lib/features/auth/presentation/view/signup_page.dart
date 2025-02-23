@@ -80,9 +80,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       controller: _nicknameController,
                       label: 'Nickname',
                       icon: Icons.badge,
-                      validator: (value) => value?.isEmpty ?? true
-                          ? 'Please enter your nickname'
-                          : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your nickname';
+                        }
+                        // Add regex validation ONLY HERE
+                        if (!RegExp(r'^[A-Za-z0-9_]+$').hasMatch(value)) {
+                          return 'Only letters, numbers, and underscores are allowed.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 20),
                     CustomTextFormField(
@@ -106,26 +113,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           : null,
                     ),
                     const SizedBox(height: 30),
-                    BlocConsumer<AuthBloc, AuthState>(
-                      listener: (context, state) {
-                        if (state is AuthSuccess) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(state.welcomeMessage ?? 'Success!')),
-                          );
-                          context.go('/home');
-
-                        } else if (state is RegisterFailure) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(state.message)),
-                          );
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state is AuthLoading) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-
-                        return AuthButton(
+                    Column(
+                      children: [
+                        AuthButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               context.read<AuthBloc>().add(
@@ -139,8 +129,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             }
                           },
                           text: 'REGISTER',
-                        );
-                      },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     if (isLargeScreen)

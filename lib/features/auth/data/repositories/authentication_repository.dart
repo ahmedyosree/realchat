@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/firebase_firestore_user_service.dart';
 import '../../../../core/exceptions/auth_exception.dart';
 import '../../../../core/models/user.dart';
-import '../services/local_storage_service.dart';
+import '../../../../services/local_storage_service.dart';
 import '../services/firebase_authentication_service.dart';
 
 /// A wrapper class to store Google sign-in results.
@@ -76,7 +76,7 @@ class AuthenticationRepository {
         name: name,
         nickname: nickname,
         signInTime: DateTime.now(),
-        friends: [],
+        chats: [],
       );
 
       await _fireStoreService.setDocument(
@@ -111,7 +111,7 @@ class AuthenticationRepository {
         name: name,
         nickname: nickname,
         signInTime: DateTime.now(),
-        friends: [],
+        chats: [],
       );
       await _fireStoreService.setDocument(
 

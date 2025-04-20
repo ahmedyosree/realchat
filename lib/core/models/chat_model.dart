@@ -1,44 +1,34 @@
 import 'package:equatable/equatable.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 class ChatModel extends Equatable {
   final String id;
   final List<String> people;
-  // Each message is represented as a Map with 'id' and 'text' keys.
-  final List<Map<String, String>> messages;
+  final DateTime chatStartIn;
 
   const ChatModel({
     required this.id,
     required this.people,
-    required this.messages,
+    required this.chatStartIn,
   });
 
-  /// Creates a ChatModel from a map.
   factory ChatModel.fromMap(Map<String, dynamic> map) {
-    List<Map<String, String>> messagesList = [];
-    if (map['messages'] != null) {
-      for (var message in map['messages']) {
-        messagesList.add({
-          'id': message['id'] as String,
-          'text': message['text'] as String,
-        });
-      }
-    }
     return ChatModel(
       id: map['id'] as String,
       people: List<String>.from(map['people'] ?? []),
-      messages: messagesList,
+      chatStartIn: map['chatStartIn'] is Timestamp
+          ? (map['chatStartIn'] as Timestamp).toDate()
+          : DateTime.parse(map['chatStartIn']),
     );
   }
 
-  /// Converts the ChatModel to a map for Firebase storage.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'people': people,
-      'messages': messages,
+      'chatStartIn': chatStartIn.toIso8601String(),
     };
   }
 
   @override
-  List<Object> get props => [id, people, messages];
+  List<Object> get props => [id, people, chatStartIn];
 }

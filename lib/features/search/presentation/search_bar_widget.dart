@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/user.dart';
+import '../../chat/bloc/chat_bloc.dart';
 import '../bloc/search_bloc.dart';
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -169,9 +170,62 @@ class _SearchResults extends StatelessWidget {
                 "@${user.nickname}",
                 style: TextStyle(color: Colors.grey[600]),
               ),
-              onTap: () {
-                // Handle user selection
-              },
+              // Add a trailing button for starting a chat.
+              trailing: ElevatedButton(
+                onPressed: () {
+                  // Open a bottom sheet to prompt for the first message.
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      // Use a controller to capture the user's input.
+                      final TextEditingController _controller = TextEditingController();
+                      return Padding(
+                        padding: MediaQuery.of(context).viewInsets,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                controller: _controller,
+                                decoration: const InputDecoration(
+                                  labelText: 'Enter your first message',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                              const SizedBox(height: 16.0),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final String firstMessage = _controller.text.trim();
+                                  if (firstMessage.isNotEmpty) {
+                                    final String friendId = user.id;
+                                    // Dispatch the event with the user's message.
+                                    context.read<ChatBloc>().add(
+                                      CreateChatEvent(
+                                        firstMessage: firstMessage,
+                                        friendId: friendId,
+                                      ),
+                                    );
+                                    // Optionally, navigate to your chat screen using go_router here.
+                                    // For example:
+                                    // context.go('/chat/$friendId');
+                                    Navigator.of(context).pop(); // Close the bottom sheet.
+                                  }
+                                },
+                                child: const Text("Start Chat"),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text("Chat"),
+              ),
+
+
             );
           },
         ),

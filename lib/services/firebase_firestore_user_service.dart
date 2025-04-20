@@ -44,5 +44,10 @@ class FireStoreUserService {
         .get();
   }
 
+  Future<void> addChatToUser(String userId, String chatId) async {
+    await _firestore.collection(collectionPath).doc(userId).update({
+      'chats': FieldValue.arrayUnion([chatId]),
+    });
+  }
 
 }

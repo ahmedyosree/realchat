@@ -8,7 +8,7 @@ class UserModel extends Equatable {
   final String name;
   final String nickname;
   final DateTime signInTime;
-  final List<String> friends;
+  final List<String> chats;
 
   UserModel({
     required this.id,
@@ -16,7 +16,7 @@ class UserModel extends Equatable {
     required this.name,
     required this.nickname,
     required this.signInTime,
-    required this.friends,
+    required this.chats,
   });
 
   /// Factory constructor to create UserModel from a map
@@ -29,7 +29,7 @@ class UserModel extends Equatable {
       signInTime: map['signInTime'] is Timestamp
           ? (map['signInTime'] as Timestamp).toDate()
           : DateTime.parse(map['signInTime']),
-      friends: List<String>.from(map['friends'] ?? []),
+      chats: List<String>.from(map['chats'] ?? []),
     );
   }
 
@@ -41,7 +41,7 @@ class UserModel extends Equatable {
       'name': name,
       'nickname': nickname,
       'signInTime': signInTime.toIso8601String(),
-      'friends': friends,
+      'chats': chats,
     };
   }
 

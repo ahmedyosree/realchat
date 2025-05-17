@@ -21,9 +21,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ) async {
     emit(ChatLoading());
     try {
-      await chatRepository.createChat(event.firstMessage, event.friendId );
+      await chatRepository.createChat(event.firstMessage, event.friendId , event.friendKey);
       emit(ChatSuccess());
     } catch (error) {
+
       emit(ChatFailure(error: error.toString()));
     }
   }

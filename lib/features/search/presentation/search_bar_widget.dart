@@ -200,11 +200,13 @@ class _SearchResults extends StatelessWidget {
                                   final String firstMessage = _controller.text.trim();
                                   if (firstMessage.isNotEmpty) {
                                     final String friendId = user.id;
+                                    final String friendKey= user.publicKey;
                                     // Dispatch the event with the user's message.
                                     context.read<ChatBloc>().add(
                                       CreateChatEvent(
                                         firstMessage: firstMessage,
                                         friendId: friendId,
+                                        friendKey: friendKey,
                                       ),
                                     );
                                     // Optionally, navigate to your chat screen using go_router here.

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../services/encryption_service.dart';
 import '../../../../services/firebase_firestore_user_service.dart';
 import '../../../../core/exceptions/auth_exception.dart';
 import '../../../../core/models/user.dart';
@@ -18,7 +19,7 @@ class GoogleSignInResult {
 /// Authentication repository responsible for handling user authentication,
 /// registration, and session management.
 class AuthenticationRepository {
-
+  final encryptionService = EncryptionService();
   final FirebaseAuthService _firebaseAuthService;
   final LocalStorageService _localStorageService;
   final FireStoreUserService _fireStoreService;
@@ -42,7 +43,16 @@ class AuthenticationRepository {
 
         docId: firebaseUser.uid,
       );
+      final keyPairMap = await _localStorageService.getKeyPair();
+      if(keyPairMap == null){
+        final myKeyPair = await encryptionService.generateKeyPair();
+        final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
+        final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+        await _localStorageService.saveKeyPair(mapKeyPair);
 
+        await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKey", value: myPublicKey);
+
+      }
       final user = UserModel.fromMap(docSnapshot.data()!);
       await _localStorageService.saveUser(user);
       return user;
@@ -70,6 +80,12 @@ class AuthenticationRepository {
           await _firebaseAuthService.registerWithEmail(email, password);
       if (firebaseUser == null) return null;
 
+
+      final myKeyPair = await encryptionService.generateKeyPair();
+      final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
+      final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+      await _localStorageService.saveKeyPair(mapKeyPair);
+
       final user = UserModel(
         id: firebaseUser.uid,
         email: email,
@@ -77,6 +93,7 @@ class AuthenticationRepository {
         nickname: nickname,
         signInTime: DateTime.now(),
         chats: [],
+        publicKey: myPublicKey,
       );
 
       await _fireStoreService.setDocument(
@@ -104,6 +121,11 @@ class AuthenticationRepository {
         throw AuthException("Nickname already exists , try another one", "nickname-already-in-use");
       }
 
+      final myKeyPair = await encryptionService.generateKeyPair();
+      final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
+      final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+      await _localStorageService.saveKeyPair(mapKeyPair);
+
       UserModel user;
       user = UserModel(
         id: firebaseUser!.uid,
@@ -112,6 +134,7 @@ class AuthenticationRepository {
         nickname: nickname,
         signInTime: DateTime.now(),
         chats: [],
+        publicKey: myPublicKey,
       );
       await _fireStoreService.setDocument(
 
@@ -136,6 +159,17 @@ class AuthenticationRepository {
 
         docId: firebaseUser.uid,
       );
+
+      final keyPairMap = await _localStorageService.getKeyPair();
+      if(keyPairMap == null){
+        final myKeyPair = await encryptionService.generateKeyPair();
+        final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
+        final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+        await _localStorageService.saveKeyPair(mapKeyPair);
+
+        await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKey", value: myPublicKey);
+
+      }
 
       if (!docSnapshot.exists || docSnapshot.data() == null) {
         // No Firestore document → return GoogleSignInResult with only firebaseUser

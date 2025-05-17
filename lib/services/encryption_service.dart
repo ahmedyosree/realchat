@@ -36,30 +36,75 @@ class EncryptionService {
     return SimplePublicKey(bytes, type: KeyPairType.x25519);
   }
 
-  /// Computes the shared secret given my key pair and the friend's public key string.
-  Future<SecretKey> computeSharedSecret({
-    required KeyPair myKeyPair,
-    required String friendPublicKeyStr,
-  }) async {
-    final friendPublicKey = importPublicKey(friendPublicKeyStr);
-    return await algorithm.sharedSecretKey(
-      keyPair: myKeyPair,
-      remotePublicKey: friendPublicKey,
+  /// Serializes an X25519 [KeyPair] to a map of Base64-encoded strings.
+  Future<Map<String, String>> keyPairToMap(KeyPair keyPair) async {
+    // Extract the key material into SimpleKeyPairData
+    final simpleKeyPairData = await keyPair.extract() as SimpleKeyPairData;
+    // Access the private key bytes
+    final privateKeyBytes = simpleKeyPairData.bytes;
+    // Access the public key (already a SimplePublicKey)
+    final publicKey = simpleKeyPairData.publicKey;
+
+    return {
+      'privateKey': base64Encode(privateKeyBytes),
+      'publicKey': base64Encode(publicKey.bytes),
+    };
+  }
+
+  /// Deserializes a map of Base64 strings back to an X25519 [SimpleKeyPairData].
+  Future<SimpleKeyPairData> mapToKeyPair(Map<String, String> keyPairMap) async {
+    // Decode the Base64-encoded private key bytes
+    final privateKeyBytes = base64Decode(keyPairMap['privateKey']!);
+
+    // Use your importPublicKey helper to get a SimplePublicKey
+    final publicKey = importPublicKey(keyPairMap['publicKey']!);
+
+    // Reconstruct the full key pair
+    return SimpleKeyPairData(
+      privateKeyBytes,
+      publicKey: publicKey,
+      type: KeyPairType.x25519,
     );
   }
 
+  /// Computes the shared secret given my key pair and the friend's public key string.
+    Future<SecretKey> computeSharedSecret({
+      required KeyPair myKeyPair,
+      required String friendPublicKeyStr,
+    }) async {
+      final friendPublicKey = importPublicKey(friendPublicKeyStr);
+      return await algorithm.sharedSecretKey(
+        keyPair: myKeyPair,
+        remotePublicKey: friendPublicKey,
+      );
+    }
+
   /// Derives a 256-bit AES key (for AES-GCM) using HKDF based on the shared secret.
   Future<SecretKey> deriveAesKey(SecretKey sharedSecret) async {
+    final salt = utf8.encode('flutter chat salt v1');
     final hkdf = Hkdf(
       hmac: Hmac.sha256(),
       outputLength: 32, // 32 bytes = 256 bits
     );
     return await hkdf.deriveKey(
       secretKey: sharedSecret,
-      nonce: [],
+      nonce: salt,
       info: utf8.encode('flutter chat encryption'),
     );
   }
+
+  /// Converts a [SecretKey] to a base64-encoded string for storage.
+  Future<String> secretKeyToString(SecretKey key) async {
+    final keyData = await key.extract(); // SecretKeyData
+    return base64Encode(keyData.bytes);
+  }
+
+  /// Imports a base64-encoded string back into a [SecretKey].
+  Future<SecretKey> importSecretKey(String base64Key) async {
+    final bytes = base64Decode(base64Key);
+    return SecretKey(bytes);
+  }
+
 
   /// Encrypts the plainText using AES-GCM and returns a SecretBox containing ciphertext, nonce, and MAC.
   Future<SecretBox> encryptMessage(SecretKey aesKey, String plainText) async {

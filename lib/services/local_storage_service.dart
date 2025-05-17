@@ -7,6 +7,7 @@ import '../core/models/user.dart';
 /// Service for local storage (SharedPreferences)
 class LocalStorageService {
   final SharedPreferences _prefs;
+  static const _sharedSecretsPrefsKey = 'sharedSecrets';
 
   LocalStorageService(this._prefs);
 
@@ -27,4 +28,55 @@ class LocalStorageService {
     final Map<String, dynamic> decodedData = json.decode(userData);
     return UserModel.fromMap(decodedData);
   }
+
+
+  /// Saves a KeyPair to SharedPreferences.
+  Future<void> saveKeyPair(Map<String, String> keyPairMap) async {
+    final keyPairJson = json.encode(keyPairMap);
+    await _prefs.setString('keyPair', keyPairJson);
+  }
+
+  /// Retrieves a KeyPair from SharedPreferences.
+  Future<Map<String, String>?> getKeyPair() async {
+    final keyPairJson = _prefs.getString('keyPair');
+    if (keyPairJson == null) return null;
+    return Map<String, String>.from(json.decode(keyPairJson));
+  }
+
+  /// Save or update the shared secret for a specific chat
+  Future<void> saveSharedSecret(String chatId, String secretString) async {
+    final all = await _getSharedSecretsMap();
+    all[chatId] = secretString;
+    await _prefs.setString(_sharedSecretsPrefsKey, json.encode(all));
+  }
+
+  /// Retrieve the shared secret for a specific chat, or null if absent
+  Future<String?> getSharedSecret(String chatId) async {
+    final all = await _getSharedSecretsMap();
+    return all[chatId];
+  }
+
+  /// Remove the shared secret for a specific chat
+  Future<void> removeSharedSecret(String chatId) async {
+    final all = await _getSharedSecretsMap();
+    if (all.containsKey(chatId)) {
+      all.remove(chatId);
+      await _prefs.setString(_sharedSecretsPrefsKey, json.encode(all));
+    }
+  }
+
+  /// Get all stored shared secrets (chatId -> sharedSecret)
+  Future<Map<String, String>> getAllSharedSecrets() async {
+    return await _getSharedSecretsMap();
+  }
+
+  /// Internal helper to decode the shared-secrets JSON map
+  Future<Map<String, String>> _getSharedSecretsMap() async {
+    final jsonString = _prefs.getString(_sharedSecretsPrefsKey);
+    if (jsonString == null) return {};
+    final Map<String, dynamic> decoded = json.decode(jsonString);
+    return decoded.map((k, v) => MapEntry(k, v as String));
+  }
 }
+
+

@@ -21,5 +21,39 @@ class FireStoreChatService {
     await chatDoc.collection('messages').add(message.toMap());
   }
 
-/// Optionally, you can add methods for retrieving chats or messages...
+
+  /// Stream all chats that involve [userId] and whose start is *after* [since].
+  Stream<List<ChatModel>> streamUserChats(String userId, DateTime since) {
+    final tsSince = Timestamp.fromDate(since);
+    return _firestore
+        .collection(collectionPath)
+        .where('people', arrayContains: userId)
+        .where('chatStartIn', isGreaterThan: tsSince)
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) {
+      final data = doc.data();
+      return ChatModel.fromMap({
+        ...data,
+      });
+    }).toList());
+  }
+
+  /// Stream all messages in chat [chatId] whose timestamp is *after* [since].
+  Stream<List<Message>> streamMessages(
+      String chatId, DateTime since) {
+    final tsSince = Timestamp.fromDate(since);
+    return _firestore
+        .collection(collectionPath)
+        .doc(chatId)
+        .collection('messages')
+        .where('timestamp', isGreaterThan: tsSince)
+        .orderBy('timestamp', descending: false)
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) {
+      return Message.fromMap({
+        ...doc.data(),
+        'timestamp': doc.data()['timestamp'],
+      }, doc.id);
+    }).toList());
+  }
 }

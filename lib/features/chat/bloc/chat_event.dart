@@ -11,11 +11,13 @@ sealed class ChatEvent extends Equatable{
 class CreateChatEvent extends ChatEvent {
   final String firstMessage;
   final String friendId;
+  final String friendKey;
 
   const CreateChatEvent({
     required this.firstMessage,
     required this.friendId,
+    required this.friendKey,
   });
   @override
-  List<Object> get props => [firstMessage, friendId];
+  List<Object> get props => [firstMessage, friendId, friendKey];
 }

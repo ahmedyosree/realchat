@@ -6,11 +6,18 @@ allprojects {
 }
 
 rootProject.buildDir = "../build"
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
+
+subprojects { proj ->
+    proj.buildDir = "${rootProject.buildDir}/${proj.name}"
+    proj.evaluationDependsOn(":app")
+
+    proj.plugins.withId("com.android.library") {
+        proj.extensions.findByName("android")?.with {
+            if (!namespace) {
+                namespace = proj.group ?: proj.name
+            }
+        }
+    }
 }
 
 tasks.register("clean", Delete) {

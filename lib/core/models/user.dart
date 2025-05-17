@@ -9,6 +9,7 @@ class UserModel extends Equatable {
   final String nickname;
   final DateTime signInTime;
   final List<String> chats;
+  final String publicKey;
 
   UserModel({
     required this.id,
@@ -17,6 +18,7 @@ class UserModel extends Equatable {
     required this.nickname,
     required this.signInTime,
     required this.chats,
+    required this.publicKey,
   });
 
   /// Factory constructor to create UserModel from a map
@@ -30,6 +32,7 @@ class UserModel extends Equatable {
           ? (map['signInTime'] as Timestamp).toDate()
           : DateTime.parse(map['signInTime']),
       chats: List<String>.from(map['chats'] ?? []),
+      publicKey: map['publicKey'] as String,
     );
   }
 
@@ -42,8 +45,10 @@ class UserModel extends Equatable {
       'nickname': nickname,
       'signInTime': signInTime.toIso8601String(),
       'chats': chats,
+      'publicKey': publicKey,
     };
   }
+
 
   @override
   List<Object> get props => [id];

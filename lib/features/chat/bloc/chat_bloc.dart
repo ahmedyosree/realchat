@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
-
+import '../../../core/models/chat_model.dart';
 import '../data/repositories/chat_repositories.dart';
 
 part 'chat_event.dart';
@@ -9,23 +11,75 @@ part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository chatRepository;
+  StreamSubscription<List<ChatModel>>? _chatsSubscription;
 
   ChatBloc({required this.chatRepository}) : super(ChatInitial()) {
-    on<CreateChatEvent>(_onCreateChat);
+    on<StartNewChatEvent>(_onCreateChat);
+    on<GetChatsEvent>(_onGetChats);
+    on<StopGettingChatsEvent>(_onStopGettingChats);
+    on<ChatsUpdated>(_onChatsUpdated);
+    on<ChatsError>((event, emit) {
+      emit(GettingChatsFailure(event.error));
+    });
+
 
   }
 
   Future<void> _onCreateChat(
-      CreateChatEvent event,
+      StartNewChatEvent event,
       Emitter<ChatState> emit,
       ) async {
-    emit(ChatLoading());
+    emit(StartNewChatInProgress());
     try {
-      await chatRepository.createChat(event.firstMessage, event.friendId , event.friendKey);
-      emit(ChatSuccess());
+      await chatRepository.startNewChat(event.firstMessage, event.friendId , event.friendKey);
     } catch (error) {
 
-      emit(ChatFailure(error: error.toString()));
+      emit(StartNewChatFailure(error.toString()));
     }
   }
+
+  Future<void> _onGetChats(
+      GetChatsEvent event,
+      Emitter<ChatState> emit,
+      ) async {
+    // Cancel any previous subscription to prevent duplicate listeners
+    await _chatsSubscription?.cancel();
+
+    // Start Firestore -> SQLite sync in the background
+    chatRepository.startChatSync();
+
+    // Listen to SQLite for real-time UI updates via stream
+    _chatsSubscription = chatRepository.getChatsForUI().listen(
+          (chats) => add(ChatsUpdated(chats)), // Dispatch event with new chats
+      onError: (error) => add(ChatsError(error.toString())),
+    );
+  }
+
+  Future<void> _onChatsUpdated(
+      ChatsUpdated event,
+      Emitter<ChatState> emit,
+      ) async {
+    emit(StartGettingChats(chats: event.chats));
+  }
+
+  Future<void> _onStopGettingChats(
+      StopGettingChatsEvent event,
+      Emitter<ChatState> emit,
+      ) async {
+    try {
+      await chatRepository.stopChatSync();
+      await _chatsSubscription?.cancel();
+      _chatsSubscription = null;
+      emit(const StopGettingChats());
+    } catch (e) {
+      emit(GettingChatsFailure("Error stopping chat sync: ${e.toString()}"));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _chatsSubscription?.cancel();
+    return super.close();
+  }
+
 }

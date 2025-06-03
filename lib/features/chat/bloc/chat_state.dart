@@ -7,16 +7,37 @@ sealed class ChatState  extends Equatable {
   List<Object> get props => [];
 }
 
-final class ChatInitial extends ChatState {}
+class StartNewChatInProgress extends ChatState {}
 
-class ChatLoading extends ChatState {}
+class StartNewChatSuccess extends ChatState {}
 
-class ChatSuccess extends ChatState {}
-
-class ChatFailure extends ChatState {
+class StartNewChatFailure extends ChatState {
   final String error;
+  const StartNewChatFailure(this.error);
 
-  const ChatFailure({required this.error});
+  @override
+  List<Object> get props => [error];
+}
+
+class ChatInitial extends ChatState {}
+
+class StartGettingChats extends ChatState {
+  final List<ChatModel> chats;
+
+  const StartGettingChats({this.chats = const []});
+
+  @override
+  List<Object> get props => [chats];
+}
+
+class StopGettingChats extends ChatState {
+  const StopGettingChats();
+}
+
+class GettingChatsFailure extends ChatState {
+  final String error;
+  const GettingChatsFailure(this.error);
+
   @override
   List<Object> get props => [error];
 }

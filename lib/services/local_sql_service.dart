@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -43,22 +44,14 @@ class LocalSqlService {
 
   LocalSqlService._internal() : _database = LocalDatabase();
 
-  // Function to add chats from Firestore in real-time and store them ordered by dates
-  Future<void> addChatsFromStream(Stream<List<ChatModel>> firestoreStream) async {
-    firestoreStream.listen((chats) async {
-      // Sort the chats by the `chatStartIn` field in ascending order
-      chats.sort((a, b) => a.chatStartIn.compareTo(b.chatStartIn));
-
-      for (final chat in chats) {
+  Future<void> addChats(ChatModel chat) async {
         await _database.into(_database.chats).insertOnConflictUpdate(
           ChatsCompanion(
             id: Value(chat.id),
-            people: Value(chat.people.join(',')), // Store as a comma-separated string
+            people: Value(jsonEncode(chat.people)),
             chatStartIn: Value(chat.chatStartIn),
           ),
         );
-      }
-    });
   }
 
   Future<DateTime?> getMostRecentChatTime() async { // Renamed for clarity
@@ -79,7 +72,7 @@ class LocalSqlService {
       return rows.map((row) {
         return ChatModel(
           id: row.id,
-          people: row.people.split(','), // Convert back to a list
+          people:  (jsonDecode(row.people) as List<dynamic>).cast<String>(),
           chatStartIn: row.chatStartIn,
         );
       }).toList();

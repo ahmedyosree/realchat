@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
               firestoreChatService: fireStoreChatService,
               localStorageService: localStorageService,
               fireStoreUserService: fireStoreService,
-            ),
+            )
         ),
         ),],
       child: const AppRouter(),

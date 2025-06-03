@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../chat/bloc/chat_bloc.dart';
+import '../../../chat/presentation/chat_list_view.dart';
 import '../../../search/presentation/search_bar_widget.dart';
 import '../../logic/bloc/auth_bloc.dart';
 import '../../logic/bloc/auth_event.dart';
@@ -39,7 +41,9 @@ class HomeScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          context.read<ChatBloc>().add(StopGettingChatsEvent());
                           context.read<AuthBloc>().add(SignOutEvent());
+
                         },
                         child: const Text('Logout'),
                       ),
@@ -105,10 +109,13 @@ class HomeScreen extends StatelessWidget {
                         _buildUserInfoItem('Email', user.email),
                         const SizedBox(height: 8),
                         _buildUserInfoItem('User ID', user.id),
+
                       ],
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                ChatListWidget()
               ],
             ),
           ),

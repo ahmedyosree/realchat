@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/widgets/auth_button.dart';
 import '../../../../core/constants/widgets/auth_text_field.dart';
 import '../../../../core/constants/widgets/social_login_button.dart';
+import '../../../chat/bloc/chat_bloc.dart';
 import '../../logic/bloc/auth_bloc.dart';
 import '../../logic/bloc/auth_event.dart';
 import '../../logic/bloc/auth_state.dart';
@@ -60,11 +61,13 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state is AuthSuccess) {
             print("7");
             context.go('/home');
+            context.read<ChatBloc>().add(GetChatsEvent());
             if (state.welcomeMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.welcomeMessage!)),
               );
             }
+
           } else if (state is AddInfo) {
             print("8");
             context.push('/addinfo');

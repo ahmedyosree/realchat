@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:uuid/uuid.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/chat_model.dart';
 import '../../../../core/models/message.dart';
 import '../../../../services/encryption_service.dart';
@@ -64,7 +64,7 @@ final localSqlService = LocalSqlService();
   }
 
 
-  Future<void> createChat(String? firstMessage, String? friendId , String? friendKey) async {
+  Future<void> startNewChat(String? firstMessage, String? friendId , String? friendKey) async {
     // Validate required parameters.
     if (firstMessage == null || friendId == null || friendKey == null) {
       throw Exception(
@@ -79,7 +79,7 @@ final localSqlService = LocalSqlService();
     final ChatModel newChat = ChatModel(
       id: chatId,
       people: [currentUserId, friendId],
-      chatStartIn: DateTime.now(),
+      chatStartIn: DateTime.now().toUtc(),
     );
 
     // Create the chat document in Firestore.
@@ -101,27 +101,28 @@ final localSqlService = LocalSqlService();
     await _fireStoreUserService.addChatToUser(friendId, chatId);
   }
 
-  /// Start syncing chats from Firestore to local SQLite database
-  Future<void> startSyncingChats() async {
+  /// Starts syncing new chats from Firestore to local SQLite storage in real time.
+    Future<void> startChatSync() async {
     // Get the latest chat's start time from the local database
-    final DateTime? latestChatTime = await localSqlService.getMostRecentChatTime(); // New
+    final DateTime? latestChatTime = await localSqlService.getMostRecentChatTime();
     final String currentUserId = _localStorageService.getUser()!.id;
 
     // If no chats exist locally, use a very old date
-    final DateTime since = latestChatTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final Timestamp since = Timestamp.fromDate(latestChatTime ?? DateTime.fromMillisecondsSinceEpoch(0).toUtc());
 
-    // Stream chats from Firestore
-    final Stream<List<ChatModel>> firestoreChatsStream =
-    _firestoreChatService.streamUserChats(currentUserId, since);
-
-    // Listen to the stream and sync chats to the local database
-    _firestoreChatsSubscription = firestoreChatsStream.listen((chats) async {
-      await localSqlService.addChatsFromStream(Stream.value(chats));
+print(since);
+print(currentUserId);
+    _firestoreChatsSubscription = _firestoreChatService.streamUserChats(currentUserId, since).listen((chats)  {
+      print("dgdfgdhdjgdhjghdjfgjfghjfjjfjfjfjfgjfjfjgdhjghjhgjhgj");
+      for (final chat in chats) {
+        print("chatttttttt");
+         localSqlService.addChats(chat);
+      }
     });
   }
 
   /// Stop syncing chats from Firestore to local SQLite database
-  Future<void> stopSyncingChats() async {
+  Future<void> stopChatSync() async {
     await _firestoreChatsSubscription?.cancel();
     _firestoreChatsSubscription = null;
   }

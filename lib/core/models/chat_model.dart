@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 class ChatModel extends Equatable {
   final String id;
   final List<String> people;
@@ -15,9 +15,7 @@ class ChatModel extends Equatable {
     return ChatModel(
       id: map['id'] as String,
       people: List<String>.from(map['people'] ?? []),
-      chatStartIn: map['chatStartIn'] is Timestamp
-          ? (map['chatStartIn'] as Timestamp).toDate()
-          : DateTime.parse(map['chatStartIn']),
+      chatStartIn: (map['chatStartIn'] as Timestamp).toDate(),
     );
   }
 
@@ -25,7 +23,7 @@ class ChatModel extends Equatable {
     return {
       'id': id,
       'people': people,
-      'chatStartIn': chatStartIn.toIso8601String(),
+      'chatStartIn':Timestamp.fromDate(chatStartIn),
     };
   }
 

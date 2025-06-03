@@ -23,20 +23,18 @@ class FireStoreChatService {
 
 
   /// Stream all chats that involve [userId] and whose start is *after* [since].
-  Stream<List<ChatModel>> streamUserChats(String userId, DateTime since) {
-    final tsSince = Timestamp.fromDate(since);
-    return _firestore
-        .collection(collectionPath)
-        .where('people', arrayContains: userId)
-        .where('chatStartIn', isGreaterThan: tsSince)
-        .snapshots()
-        .map((snap) => snap.docs.map((doc) {
-      final data = doc.data();
-      return ChatModel.fromMap({
-        ...data,
-      });
-    }).toList());
-  }
+  Stream<List<ChatModel>> streamUserChats(String userId, Timestamp  since) {
+
+      return _firestore
+          .collection(collectionPath)
+          .where('people', arrayContains: userId)
+          .where('chatStartIn', isGreaterThan: since)
+          .snapshots()
+          .map((snap) => snap.docs.map((doc) => ChatModel.fromMap(doc.data())).toList());
+    }
+
+
+
 
   /// Stream all messages in chat [chatId] whose timestamp is *after* [since].
   Stream<List<Message>> streamMessages(

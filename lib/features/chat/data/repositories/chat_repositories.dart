@@ -8,14 +8,14 @@ import '../../../../core/models/message.dart';
 import '../../../../services/encryption_service.dart';
 import '../../../../services/firebase_firestore_chat_service.dart';
 import '../../../../services/firebase_firestore_user_service.dart';
-import '../../../../services/local_sql_service.dart';
+import '../../../../services/local_sql_service/local_chats_service.dart';
 import '../../../../services/local_storage_service.dart';
 class ChatRepository {
   final FireStoreChatService _firestoreChatService;
   final LocalStorageService _localStorageService;
   final FireStoreUserService _fireStoreUserService; // Added user service
   final encryptionService = EncryptionService();
-final localSqlService = LocalSqlService();
+final localChatsService = LocalChatsService();
   StreamSubscription<List<ChatModel>>? _firestoreChatsSubscription;
 
   ChatRepository({
@@ -104,7 +104,7 @@ final localSqlService = LocalSqlService();
   /// Starts syncing new chats from Firestore to local SQLite storage in real time.
     Future<void> startChatSync() async {
     // Get the latest chat's start time from the local database
-    final DateTime? latestChatTime = await localSqlService.getMostRecentChatTime();
+    final DateTime? latestChatTime = await localChatsService.getMostRecentChatTime();
     final String currentUserId = _localStorageService.getUser()!.id;
 
     // If no chats exist locally, use a very old date
@@ -116,7 +116,7 @@ print(currentUserId);
       print("dgdfgdhdjgdhjghdjfgjfghjfjjfjfjfjfgjfjfjgdhjghjhgjhgj");
       for (final chat in chats) {
         print("chatttttttt");
-         localSqlService.addChats(chat);
+        localChatsService.addChat(chat);
       }
     });
   }
@@ -129,7 +129,7 @@ print(currentUserId);
 
   /// Get all chats from the local database as a stream to use in the UI via BLoC
   Stream<List<ChatModel>> getChatsForUI() {
-    return localSqlService.getChatsStream();
+    return localChatsService.getChatsStream();
   }
 }
 

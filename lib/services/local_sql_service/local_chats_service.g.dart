@@ -1,13 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'local_sql_service.dart';
+part of 'local_chats_service.dart';
 
 // ignore_for_file: type=lint
-class $ChatsTable extends Chats with TableInfo<$ChatsTable, Chat> {
+class $ChatTableTable extends ChatTable
+    with TableInfo<$ChatTableTable, ChatTableData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ChatsTable(this.attachedDatabase, [this._alias]);
+  $ChatTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -18,21 +19,21 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, Chat> {
   late final GeneratedColumn<String> people = GeneratedColumn<String>(
       'people', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _chatStartInMeta =
-      const VerificationMeta('chatStartIn');
+  static const VerificationMeta _chatStartedAtMeta =
+      const VerificationMeta('chatStartedAt');
   @override
-  late final GeneratedColumn<DateTime> chatStartIn = GeneratedColumn<DateTime>(
-      'chat_start_in', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  late final GeneratedColumn<DateTime> chatStartedAt =
+      GeneratedColumn<DateTime>('chat_started_at', aliasedName, false,
+          type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, people, chatStartIn];
+  List<GeneratedColumn> get $columns => [id, people, chatStartedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'chats';
+  static const String $name = 'chat_table';
   @override
-  VerificationContext validateIntegrity(Insertable<Chat> instance,
+  VerificationContext validateIntegrity(Insertable<ChatTableData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -47,13 +48,13 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, Chat> {
     } else if (isInserting) {
       context.missing(_peopleMeta);
     }
-    if (data.containsKey('chat_start_in')) {
+    if (data.containsKey('chat_started_at')) {
       context.handle(
-          _chatStartInMeta,
-          chatStartIn.isAcceptableOrUnknown(
-              data['chat_start_in']!, _chatStartInMeta));
+          _chatStartedAtMeta,
+          chatStartedAt.isAcceptableOrUnknown(
+              data['chat_started_at']!, _chatStartedAtMeta));
     } else if (isInserting) {
-      context.missing(_chatStartInMeta);
+      context.missing(_chatStartedAtMeta);
     }
     return context;
   }
@@ -61,54 +62,54 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, Chat> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Chat map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ChatTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Chat(
+    return ChatTableData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       people: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}people'])!,
-      chatStartIn: attachedDatabase.typeMapping.read(
-          DriftSqlType.dateTime, data['${effectivePrefix}chat_start_in'])!,
+      chatStartedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}chat_started_at'])!,
     );
   }
 
   @override
-  $ChatsTable createAlias(String alias) {
-    return $ChatsTable(attachedDatabase, alias);
+  $ChatTableTable createAlias(String alias) {
+    return $ChatTableTable(attachedDatabase, alias);
   }
 }
 
-class Chat extends DataClass implements Insertable<Chat> {
+class ChatTableData extends DataClass implements Insertable<ChatTableData> {
   final String id;
   final String people;
-  final DateTime chatStartIn;
-  const Chat(
-      {required this.id, required this.people, required this.chatStartIn});
+  final DateTime chatStartedAt;
+  const ChatTableData(
+      {required this.id, required this.people, required this.chatStartedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['people'] = Variable<String>(people);
-    map['chat_start_in'] = Variable<DateTime>(chatStartIn);
+    map['chat_started_at'] = Variable<DateTime>(chatStartedAt);
     return map;
   }
 
-  ChatsCompanion toCompanion(bool nullToAbsent) {
-    return ChatsCompanion(
+  ChatTableCompanion toCompanion(bool nullToAbsent) {
+    return ChatTableCompanion(
       id: Value(id),
       people: Value(people),
-      chatStartIn: Value(chatStartIn),
+      chatStartedAt: Value(chatStartedAt),
     );
   }
 
-  factory Chat.fromJson(Map<String, dynamic> json,
+  factory ChatTableData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Chat(
+    return ChatTableData(
       id: serializer.fromJson<String>(json['id']),
       people: serializer.fromJson<String>(json['people']),
-      chatStartIn: serializer.fromJson<DateTime>(json['chatStartIn']),
+      chatStartedAt: serializer.fromJson<DateTime>(json['chatStartedAt']),
     );
   }
   @override
@@ -117,87 +118,90 @@ class Chat extends DataClass implements Insertable<Chat> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'people': serializer.toJson<String>(people),
-      'chatStartIn': serializer.toJson<DateTime>(chatStartIn),
+      'chatStartedAt': serializer.toJson<DateTime>(chatStartedAt),
     };
   }
 
-  Chat copyWith({String? id, String? people, DateTime? chatStartIn}) => Chat(
+  ChatTableData copyWith(
+          {String? id, String? people, DateTime? chatStartedAt}) =>
+      ChatTableData(
         id: id ?? this.id,
         people: people ?? this.people,
-        chatStartIn: chatStartIn ?? this.chatStartIn,
+        chatStartedAt: chatStartedAt ?? this.chatStartedAt,
       );
-  Chat copyWithCompanion(ChatsCompanion data) {
-    return Chat(
+  ChatTableData copyWithCompanion(ChatTableCompanion data) {
+    return ChatTableData(
       id: data.id.present ? data.id.value : this.id,
       people: data.people.present ? data.people.value : this.people,
-      chatStartIn:
-          data.chatStartIn.present ? data.chatStartIn.value : this.chatStartIn,
+      chatStartedAt: data.chatStartedAt.present
+          ? data.chatStartedAt.value
+          : this.chatStartedAt,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('Chat(')
+    return (StringBuffer('ChatTableData(')
           ..write('id: $id, ')
           ..write('people: $people, ')
-          ..write('chatStartIn: $chatStartIn')
+          ..write('chatStartedAt: $chatStartedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, people, chatStartIn);
+  int get hashCode => Object.hash(id, people, chatStartedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Chat &&
+      (other is ChatTableData &&
           other.id == this.id &&
           other.people == this.people &&
-          other.chatStartIn == this.chatStartIn);
+          other.chatStartedAt == this.chatStartedAt);
 }
 
-class ChatsCompanion extends UpdateCompanion<Chat> {
+class ChatTableCompanion extends UpdateCompanion<ChatTableData> {
   final Value<String> id;
   final Value<String> people;
-  final Value<DateTime> chatStartIn;
+  final Value<DateTime> chatStartedAt;
   final Value<int> rowid;
-  const ChatsCompanion({
+  const ChatTableCompanion({
     this.id = const Value.absent(),
     this.people = const Value.absent(),
-    this.chatStartIn = const Value.absent(),
+    this.chatStartedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  ChatsCompanion.insert({
+  ChatTableCompanion.insert({
     required String id,
     required String people,
-    required DateTime chatStartIn,
+    required DateTime chatStartedAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         people = Value(people),
-        chatStartIn = Value(chatStartIn);
-  static Insertable<Chat> custom({
+        chatStartedAt = Value(chatStartedAt);
+  static Insertable<ChatTableData> custom({
     Expression<String>? id,
     Expression<String>? people,
-    Expression<DateTime>? chatStartIn,
+    Expression<DateTime>? chatStartedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (people != null) 'people': people,
-      if (chatStartIn != null) 'chat_start_in': chatStartIn,
+      if (chatStartedAt != null) 'chat_started_at': chatStartedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  ChatsCompanion copyWith(
+  ChatTableCompanion copyWith(
       {Value<String>? id,
       Value<String>? people,
-      Value<DateTime>? chatStartIn,
+      Value<DateTime>? chatStartedAt,
       Value<int>? rowid}) {
-    return ChatsCompanion(
+    return ChatTableCompanion(
       id: id ?? this.id,
       people: people ?? this.people,
-      chatStartIn: chatStartIn ?? this.chatStartIn,
+      chatStartedAt: chatStartedAt ?? this.chatStartedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -211,8 +215,8 @@ class ChatsCompanion extends UpdateCompanion<Chat> {
     if (people.present) {
       map['people'] = Variable<String>(people.value);
     }
-    if (chatStartIn.present) {
-      map['chat_start_in'] = Variable<DateTime>(chatStartIn.value);
+    if (chatStartedAt.present) {
+      map['chat_started_at'] = Variable<DateTime>(chatStartedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -222,43 +226,43 @@ class ChatsCompanion extends UpdateCompanion<Chat> {
 
   @override
   String toString() {
-    return (StringBuffer('ChatsCompanion(')
+    return (StringBuffer('ChatTableCompanion(')
           ..write('id: $id, ')
           ..write('people: $people, ')
-          ..write('chatStartIn: $chatStartIn, ')
+          ..write('chatStartedAt: $chatStartedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-abstract class _$LocalDatabase extends GeneratedDatabase {
-  _$LocalDatabase(QueryExecutor e) : super(e);
-  $LocalDatabaseManager get managers => $LocalDatabaseManager(this);
-  late final $ChatsTable chats = $ChatsTable(this);
+abstract class _$LocalChatsDatabase extends GeneratedDatabase {
+  _$LocalChatsDatabase(QueryExecutor e) : super(e);
+  $LocalChatsDatabaseManager get managers => $LocalChatsDatabaseManager(this);
+  late final $ChatTableTable chatTable = $ChatTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [chats];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [chatTable];
 }
 
-typedef $$ChatsTableCreateCompanionBuilder = ChatsCompanion Function({
+typedef $$ChatTableTableCreateCompanionBuilder = ChatTableCompanion Function({
   required String id,
   required String people,
-  required DateTime chatStartIn,
+  required DateTime chatStartedAt,
   Value<int> rowid,
 });
-typedef $$ChatsTableUpdateCompanionBuilder = ChatsCompanion Function({
+typedef $$ChatTableTableUpdateCompanionBuilder = ChatTableCompanion Function({
   Value<String> id,
   Value<String> people,
-  Value<DateTime> chatStartIn,
+  Value<DateTime> chatStartedAt,
   Value<int> rowid,
 });
 
-class $$ChatsTableFilterComposer
-    extends Composer<_$LocalDatabase, $ChatsTable> {
-  $$ChatsTableFilterComposer({
+class $$ChatTableTableFilterComposer
+    extends Composer<_$LocalChatsDatabase, $ChatTableTable> {
+  $$ChatTableTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -271,13 +275,13 @@ class $$ChatsTableFilterComposer
   ColumnFilters<String> get people => $composableBuilder(
       column: $table.people, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get chatStartIn => $composableBuilder(
-      column: $table.chatStartIn, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get chatStartedAt => $composableBuilder(
+      column: $table.chatStartedAt, builder: (column) => ColumnFilters(column));
 }
 
-class $$ChatsTableOrderingComposer
-    extends Composer<_$LocalDatabase, $ChatsTable> {
-  $$ChatsTableOrderingComposer({
+class $$ChatTableTableOrderingComposer
+    extends Composer<_$LocalChatsDatabase, $ChatTableTable> {
+  $$ChatTableTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -290,13 +294,14 @@ class $$ChatsTableOrderingComposer
   ColumnOrderings<String> get people => $composableBuilder(
       column: $table.people, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get chatStartIn => $composableBuilder(
-      column: $table.chatStartIn, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get chatStartedAt => $composableBuilder(
+      column: $table.chatStartedAt,
+      builder: (column) => ColumnOrderings(column));
 }
 
-class $$ChatsTableAnnotationComposer
-    extends Composer<_$LocalDatabase, $ChatsTable> {
-  $$ChatsTableAnnotationComposer({
+class $$ChatTableTableAnnotationComposer
+    extends Composer<_$LocalChatsDatabase, $ChatTableTable> {
+  $$ChatTableTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -309,54 +314,57 @@ class $$ChatsTableAnnotationComposer
   GeneratedColumn<String> get people =>
       $composableBuilder(column: $table.people, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get chatStartIn => $composableBuilder(
-      column: $table.chatStartIn, builder: (column) => column);
+  GeneratedColumn<DateTime> get chatStartedAt => $composableBuilder(
+      column: $table.chatStartedAt, builder: (column) => column);
 }
 
-class $$ChatsTableTableManager extends RootTableManager<
-    _$LocalDatabase,
-    $ChatsTable,
-    Chat,
-    $$ChatsTableFilterComposer,
-    $$ChatsTableOrderingComposer,
-    $$ChatsTableAnnotationComposer,
-    $$ChatsTableCreateCompanionBuilder,
-    $$ChatsTableUpdateCompanionBuilder,
-    (Chat, BaseReferences<_$LocalDatabase, $ChatsTable, Chat>),
-    Chat,
+class $$ChatTableTableTableManager extends RootTableManager<
+    _$LocalChatsDatabase,
+    $ChatTableTable,
+    ChatTableData,
+    $$ChatTableTableFilterComposer,
+    $$ChatTableTableOrderingComposer,
+    $$ChatTableTableAnnotationComposer,
+    $$ChatTableTableCreateCompanionBuilder,
+    $$ChatTableTableUpdateCompanionBuilder,
+    (
+      ChatTableData,
+      BaseReferences<_$LocalChatsDatabase, $ChatTableTable, ChatTableData>
+    ),
+    ChatTableData,
     PrefetchHooks Function()> {
-  $$ChatsTableTableManager(_$LocalDatabase db, $ChatsTable table)
+  $$ChatTableTableTableManager(_$LocalChatsDatabase db, $ChatTableTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$ChatsTableFilterComposer($db: db, $table: table),
+              $$ChatTableTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$ChatsTableOrderingComposer($db: db, $table: table),
+              $$ChatTableTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$ChatsTableAnnotationComposer($db: db, $table: table),
+              $$ChatTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> people = const Value.absent(),
-            Value<DateTime> chatStartIn = const Value.absent(),
+            Value<DateTime> chatStartedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
-              ChatsCompanion(
+              ChatTableCompanion(
             id: id,
             people: people,
-            chatStartIn: chatStartIn,
+            chatStartedAt: chatStartedAt,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
             required String people,
-            required DateTime chatStartIn,
+            required DateTime chatStartedAt,
             Value<int> rowid = const Value.absent(),
           }) =>
-              ChatsCompanion.insert(
+              ChatTableCompanion.insert(
             id: id,
             people: people,
-            chatStartIn: chatStartIn,
+            chatStartedAt: chatStartedAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -366,22 +374,25 @@ class $$ChatsTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$ChatsTableProcessedTableManager = ProcessedTableManager<
-    _$LocalDatabase,
-    $ChatsTable,
-    Chat,
-    $$ChatsTableFilterComposer,
-    $$ChatsTableOrderingComposer,
-    $$ChatsTableAnnotationComposer,
-    $$ChatsTableCreateCompanionBuilder,
-    $$ChatsTableUpdateCompanionBuilder,
-    (Chat, BaseReferences<_$LocalDatabase, $ChatsTable, Chat>),
-    Chat,
+typedef $$ChatTableTableProcessedTableManager = ProcessedTableManager<
+    _$LocalChatsDatabase,
+    $ChatTableTable,
+    ChatTableData,
+    $$ChatTableTableFilterComposer,
+    $$ChatTableTableOrderingComposer,
+    $$ChatTableTableAnnotationComposer,
+    $$ChatTableTableCreateCompanionBuilder,
+    $$ChatTableTableUpdateCompanionBuilder,
+    (
+      ChatTableData,
+      BaseReferences<_$LocalChatsDatabase, $ChatTableTable, ChatTableData>
+    ),
+    ChatTableData,
     PrefetchHooks Function()>;
 
-class $LocalDatabaseManager {
-  final _$LocalDatabase _db;
-  $LocalDatabaseManager(this._db);
-  $$ChatsTableTableManager get chats =>
-      $$ChatsTableTableManager(_db, _db.chats);
+class $LocalChatsDatabaseManager {
+  final _$LocalChatsDatabase _db;
+  $LocalChatsDatabaseManager(this._db);
+  $$ChatTableTableTableManager get chatTable =>
+      $$ChatTableTableTableManager(_db, _db.chatTable);
 }

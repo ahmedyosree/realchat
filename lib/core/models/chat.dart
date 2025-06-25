@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-class ChatModel extends Equatable {
+class Chat extends Equatable {
   final String id;
   final List<String> people;
   final DateTime chatStartIn;
 
-  const ChatModel({
+  const Chat({
     required this.id,
     required this.people,
     required this.chatStartIn,
   });
 
-  factory ChatModel.fromMap(Map<String, dynamic> map) {
-    return ChatModel(
+  factory Chat.fromMap(Map<String, dynamic> map) {
+    return Chat(
       id: map['id'] as String,
       people: List<String>.from(map['people'] ?? []),
       chatStartIn: (map['chatStartIn'] as Timestamp).toDate(),

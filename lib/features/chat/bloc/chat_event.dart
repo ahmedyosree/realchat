@@ -29,7 +29,7 @@ class StopGettingChatsEvent extends ChatEvent {}
 
 // NEW: Internal event for updated chats list
 class ChatsUpdated extends ChatEvent {
-  final List<ChatModel> chats;
+  final List<Chat> chats;
   const ChatsUpdated(this.chats);
 
   @override

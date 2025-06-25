@@ -93,6 +93,26 @@ class EncryptionService {
     );
   }
 
+  ///Computes and returns the AES-GCM key for a chat.
+  Future<SecretKey> computedAesKey({
+    required String friendPublicKeyStr,
+    required String chatId,
+    required Map<String, String> myMapKeyPair
+  }) async {
+
+    final SimpleKeyPairData keyPairData =
+    await mapToKeyPair(myMapKeyPair);
+
+    final SecretKey sharedSecret = await computeSharedSecret(
+      myKeyPair: keyPairData,
+      friendPublicKeyStr: friendPublicKeyStr,
+    );
+    final aesKey = await deriveAesKey(sharedSecret);
+
+
+    return aesKey;
+  }
+
   /// Converts a [SecretKey] to a base64-encoded string for storage.
   Future<String> secretKeyToString(SecretKey key) async {
     final keyData = await key.extract(); // SecretKeyData
@@ -144,5 +164,14 @@ class EncryptionService {
       nonce: base64Decode(map['nonce'] as String),
       mac: Mac(base64Decode(map['mac'] as String)),
     );
+  }
+  /// Encrypts the plainText using AES-GCM and returns a SecretBox containing ciphertext, nonce, and MAC.
+  /// then Serializes a SecretBox into a Map that can be stored in Firestore.
+  Future<Map<String, dynamic>> encryptMessageToMap(
+      SecretKey aesKey,
+      String plainText,
+      ) async {
+    final secretBox = await encryptMessage(aesKey, plainText);
+    return secretBoxToMap(secretBox);
   }
 }

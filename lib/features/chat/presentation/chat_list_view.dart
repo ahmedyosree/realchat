@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/models/chat_model.dart';
+import '../../../core/models/chat.dart';
 import '../bloc/chat_bloc.dart';
 
 
@@ -47,7 +47,7 @@ class ChatListWidget extends StatelessWidget {
 }
 
 class _ChatItem extends StatelessWidget {
-  final ChatModel chat;
+  final Chat chat;
   final VoidCallback? onTap;
 
   const _ChatItem({Key? key, required this.chat, this.onTap}) : super(key: key);

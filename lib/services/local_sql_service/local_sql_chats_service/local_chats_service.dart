@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import '../../core/models/chat_model.dart';
+import '../../../core/models/chat.dart';
 
 // Conditional import for platform-specific database opening
 import 'local_chats_service_mobile.dart'
@@ -38,7 +38,7 @@ class LocalChatsService {
 
   LocalChatsService._internal() : _db = LocalChatsDatabase();
 
-  Future<void> addChat(ChatModel chat) async {
+  Future<void> addChat(Chat chat) async {
     await _db.into(_db.chatTable).insertOnConflictUpdate(
       ChatTableCompanion(
         id: Value(chat.id),
@@ -58,10 +58,10 @@ class LocalChatsService {
     return result?.read(_db.chatTable.chatStartedAt);
   }
 
-  Stream<List<ChatModel>> getChatsStream() {
+  Stream<List<Chat>> getChatsStream() {
     return _db.select(_db.chatTable).watch().map((rows) {
       return rows.map((row) {
-        return ChatModel(
+        return Chat(
           id: row.id,
           people: (jsonDecode(row.people) as List<dynamic>).cast<String>(),
           chatStartIn: row.chatStartedAt,

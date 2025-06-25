@@ -91,9 +91,11 @@ class AuthenticationRepository {
         email: email,
         name: name,
         nickname: nickname,
-        signInTime: DateTime.now(),
-        chats: [],
-        publicKey: myPublicKey,
+        signInTime: DateTime.now().toUtc(),
+         publicKeyInfo: {
+           'publicKey': myPublicKey,
+           'Date': DateTime.now().toUtc(),
+         },
       );
 
       await _fireStoreService.setDocument(
@@ -132,9 +134,12 @@ class AuthenticationRepository {
         email: firebaseUser.email ?? '',
         name: name,
         nickname: nickname,
-        signInTime: DateTime.now(),
-        chats: [],
-        publicKey: myPublicKey,
+        signInTime: DateTime.now().toUtc(),
+        publicKeyInfo: {
+          'publicKey': myPublicKey,
+          'Date': DateTime.now().toUtc(),
+        },
+
       );
       await _fireStoreService.setDocument(
 

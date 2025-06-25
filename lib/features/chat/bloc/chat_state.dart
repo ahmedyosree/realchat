@@ -22,7 +22,7 @@ class StartNewChatFailure extends ChatState {
 class ChatInitial extends ChatState {}
 
 class StartGettingChats extends ChatState {
-  final List<ChatModel> chats;
+  final List<Chat> chats;
 
   const StartGettingChats({this.chats = const []});
 

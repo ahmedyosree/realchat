@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 
-import '../core/models/chat_model.dart';
+import '../core/models/chat.dart';
 import '../core/models/message.dart';
 class FireStoreChatService {
   final FirebaseFirestore _firestore;
@@ -10,7 +11,7 @@ class FireStoreChatService {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Creates a new chat document with the chat metadata.
-  Future<void> createChat(ChatModel chat) async {
+  Future<void> createChat(Chat chat) async {
     await _firestore.collection(collectionPath).doc(chat.id).set(chat.toMap());
   }
 
@@ -23,35 +24,35 @@ class FireStoreChatService {
 
 
   /// Stream all chats that involve [userId] and whose start is *after* [since].
-  Stream<List<ChatModel>> streamUserChats(String userId, Timestamp  since) {
-
-      return _firestore
-          .collection(collectionPath)
-          .where('people', arrayContains: userId)
-          .where('chatStartIn', isGreaterThan: since)
-          .snapshots()
-          .map((snap) => snap.docs.map((doc) => ChatModel.fromMap(doc.data())).toList());
-    }
+  Stream<List<Chat>> streamUserChats(String userId, Timestamp since) {
+    return _firestore
+        .collection(collectionPath)
+        .where('people', arrayContains: userId)
+        .where('chatStartIn', isGreaterThan: since)
+        .snapshots()
+        .map((snap) => snap.docChanges
+          .where((change) => change.type == DocumentChangeType.added)
+          .map((docChange) => Chat.fromMap(docChange.doc.data()!))
+          .toList());
+  }
 
 
 
 
   /// Stream all messages in chat [chatId] whose timestamp is *after* [since].
-  Stream<List<Message>> streamMessages(
-      String chatId, DateTime since) {
-    final tsSince = Timestamp.fromDate(since);
+  Stream<List<Message>> streamMessages(String chatId, DateTime since) {
     return _firestore
         .collection(collectionPath)
         .doc(chatId)
         .collection('messages')
-        .where('timestamp', isGreaterThan: tsSince)
-        .orderBy('timestamp', descending: false)
+        .orderBy('sentAt', descending: false)
+        .where('sentAt', isGreaterThan: since)
         .snapshots()
-        .map((snap) => snap.docs.map((doc) {
-      return Message.fromMap({
-        ...doc.data(),
-        'timestamp': doc.data()['timestamp'],
-      }, doc.id);
-    }).toList());
+        .map((snap) => snap.docChanges
+        .where((change) => change.type == DocumentChangeType.added)
+        .map((docChange) => Message.fromMap(docChange.doc.data()!, docChange.doc.id)).toList());
   }
 }
+
+
+

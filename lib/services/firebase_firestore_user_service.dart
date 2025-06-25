@@ -70,10 +70,55 @@ class FireStoreUserService {
         .get();
   }
 
-  Future<void> addChatToUser(String userId, String chatId) async {
-    await _firestore.collection(collectionPath).doc(userId).update({
-      'chats': FieldValue.arrayUnion([chatId]),
+  /// Returns a stream of this user’s `{ 'publicKey': String, 'Date': DateTime }`
+  /// whenever their `publicKeyInfo` field changes in Firestore.
+  Stream<Map<String, dynamic>> streamPublicKeyInfo(String userId) {
+    return _firestore
+        .collection(collectionPath)
+        .doc(userId)
+        .snapshots()
+        .map((DocumentSnapshot<Map<String, dynamic>> snap) {
+      final data = snap.data();
+      if (data == null) {
+        throw StateError('User $userId does not exist');
+      }
+
+      final pkInfo = data['publicKeyInfo'] as Map<String, dynamic>?;
+      if (pkInfo == null
+          || pkInfo['publicKey'] == null
+          || pkInfo['Date'] == null) {
+        throw StateError('publicKeyInfo missing or malformed for user $userId');
+      }
+
+      return {
+        'publicKey': pkInfo['publicKey'] as String,
+        // Firestore stores timestamps as Timestamp objects
+        'Date': (pkInfo['Date'] as Timestamp).toDate(),
+      };
     });
+  }
+  /// Returns this user’s `{ 'publicKey': String, 'Date': DateTime }`
+  /// from their `publicKeyInfo` field in Firestore, as a one-time fetch.
+  /// Throws [StateError] if the user or their key info is missing or malformed.
+  Future<Map<String, dynamic>> getPublicKeyInfoOnce(String userId) async {
+    final doc = await _firestore
+        .collection(collectionPath)
+        .doc(userId)
+        .get();
+    final data = doc.data();
+    if (data == null) {
+      throw StateError('User $userId does not exist');
+    }
+
+    final pkInfo = data['publicKeyInfo'] as Map<String, dynamic>?;
+    if (pkInfo == null || pkInfo['publicKey'] == null || pkInfo['Date'] == null) {
+      throw StateError('publicKeyInfo missing or malformed for user $userId');
+    }
+
+    return {
+      'publicKey': pkInfo['publicKey'] as String,
+      'Date': (pkInfo['Date'] as Timestamp).toDate(),
+    };
   }
 
 }

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
-import '../../../core/models/chat_model.dart';
+import '../../../core/models/chat.dart';
 import '../data/repositories/chat_repositories.dart';
 
 part 'chat_event.dart';
@@ -11,7 +11,7 @@ part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository chatRepository;
-  StreamSubscription<List<ChatModel>>? _chatsSubscription;
+  StreamSubscription<List<Chat>>? _chatsSubscription;
 
   ChatBloc({required this.chatRepository}) : super(ChatInitial()) {
     on<StartNewChatEvent>(_onCreateChat);

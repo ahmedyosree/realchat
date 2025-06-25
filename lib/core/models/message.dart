@@ -6,13 +6,15 @@ class Message extends Equatable {
   // Instead of a plain text string, we store encrypted data as a Map.
   // This map should contain keys like 'cipherText', 'nonce', and 'mac'
   final Map<String, dynamic> encryptedData;
-  final DateTime timestamp;
+  final DateTime sentAt;
+  final String chatId;
 
   const Message({
     required this.id,
     required this.senderId,
     required this.encryptedData,
-    required this.timestamp,
+    required this.sentAt,
+    required this.chatId,
   });
 
   /// Create a Message model from a Firestore document map.
@@ -22,9 +24,10 @@ class Message extends Equatable {
       id: documentId,
       senderId: map['senderId'] as String,
       encryptedData: map['encryptedData'] as Map<String, dynamic>,
-      timestamp: map['timestamp'] is Timestamp
-          ? (map['timestamp'] as Timestamp).toDate()
-          : DateTime.parse(map['timestamp']),
+      //    encryptedData: Map<String, dynamic>.from(map['encryptedData'] as Map),
+      sentAt: (map['sentAt'] as Timestamp).toDate(),
+      chatId: map['chatId'] as String,
+
     );
   }
 
@@ -33,10 +36,11 @@ class Message extends Equatable {
     return {
       'senderId': senderId,
       'encryptedData': encryptedData,
-      'timestamp': timestamp.toIso8601String(),
+      'sentAt':Timestamp.fromDate(sentAt),
+      'chatId': chatId,
     };
   }
 
   @override
-  List<Object> get props => [id, senderId, encryptedData, timestamp];
+  List<Object> get props => [id, senderId, encryptedData, sentAt , chatId];
 }

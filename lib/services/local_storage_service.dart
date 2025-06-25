@@ -56,20 +56,6 @@ class LocalStorageService {
     return all[chatId];
   }
 
-  /// Remove the shared secret for a specific chat
-  Future<void> removeSharedSecret(String chatId) async {
-    final all = await _getSharedSecretsMap();
-    if (all.containsKey(chatId)) {
-      all.remove(chatId);
-      await _prefs.setString(_sharedSecretsPrefsKey, json.encode(all));
-    }
-  }
-
-  /// Get all stored shared secrets (chatId -> sharedSecret)
-  Future<Map<String, String>> getAllSharedSecrets() async {
-    return await _getSharedSecretsMap();
-  }
-
   /// Internal helper to decode the shared-secrets JSON map
   Future<Map<String, String>> _getSharedSecretsMap() async {
     final jsonString = _prefs.getString(_sharedSecretsPrefsKey);

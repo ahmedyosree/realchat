@@ -93,7 +93,7 @@ class FireStoreUserService {
       return {
         'publicKey': pkInfo['publicKey'] as String,
         // Firestore stores timestamps as Timestamp objects
-        'Date': (pkInfo['Date'] as Timestamp).toDate(),
+        'Date': DateTime.parse(pkInfo['Date'] as String),
       };
     });
   }
@@ -117,7 +117,7 @@ class FireStoreUserService {
 
     return {
       'publicKey': pkInfo['publicKey'] as String,
-      'Date': (pkInfo['Date'] as Timestamp).toDate(),
+      'Date': DateTime.parse(pkInfo['Date'] as String),
     };
   }
 

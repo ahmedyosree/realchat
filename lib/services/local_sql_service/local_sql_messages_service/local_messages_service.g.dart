@@ -554,12 +554,15 @@ abstract class _$LocalMessagesDatabase extends GeneratedDatabase {
   late final $MessageTableTable messageTable = $MessageTableTable(this);
   late final Index messagesChatIdIdx = Index('messages_chat_id_idx',
       'CREATE INDEX messages_chat_id_idx ON message_table (chat_id)');
+  late final Index messagesChatIdSentAtIdx = Index(
+      'messages_chat_id_sent_at_idx',
+      'CREATE INDEX messages_chat_id_sent_at_idx ON message_table (chat_id, sent_at)');
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [chatTable, messageTable, messagesChatIdIdx];
+      [chatTable, messageTable, messagesChatIdIdx, messagesChatIdSentAtIdx];
 }
 
 typedef $$ChatTableTableCreateCompanionBuilder = ChatTableCompanion Function({

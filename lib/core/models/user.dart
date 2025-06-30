@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 
@@ -19,6 +18,8 @@ class UserModel extends Equatable {
     required this.publicKeyInfo,
   });
 
+
+
   /// Factory constructor to create UserModel from a map
   factory UserModel.fromMap(Map<String, dynamic> map) {
     final pkInfo = map['publicKeyInfo'] as Map<String, dynamic>?;
@@ -27,10 +28,10 @@ class UserModel extends Equatable {
       email: map['email'] as String,
       name: map['name'] as String,
       nickname: map['nickname'] as String,
-      signInTime: (map['signInTime'] as Timestamp).toDate(),
+      signInTime: DateTime.parse((map['signInTime'] as String)),
       publicKeyInfo: {
         'publicKey': pkInfo?['publicKey'] as String,
-        'Date': (pkInfo?['Date'] as Timestamp).toDate(),
+        'Date':  DateTime.parse((pkInfo?['Date'] as String)),
       },
     );
   }
@@ -42,10 +43,10 @@ class UserModel extends Equatable {
       'email': email,
       'name': name,
       'nickname': nickname,
-      'signInTime': Timestamp.fromDate(signInTime),
+      'signInTime': signInTime.toIso8601String(),
       'publicKeyInfo': {
         'publicKey': publicKeyInfo['publicKey'],
-        'Date': Timestamp.fromDate(publicKeyInfo['Date'] as DateTime),
+        'Date': publicKeyInfo['Date'].toIso8601String() ,
       },
     };
   }

@@ -50,9 +50,12 @@ class AuthenticationRepository {
         final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
         await _localStorageService.saveKeyPair(mapKeyPair);
 
-        await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKey", value: myPublicKey);
-
+        await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKeyInfo", value:  {
+          'publicKey': myPublicKey,
+          'Date': DateTime.now().toUtc().toIso8601String(),
+        });
       }
+
       final user = UserModel.fromMap(docSnapshot.data()!);
       await _localStorageService.saveUser(user);
       return user;
@@ -79,12 +82,13 @@ class AuthenticationRepository {
       final User? firebaseUser =
           await _firebaseAuthService.registerWithEmail(email, password);
       if (firebaseUser == null) return null;
-
+      print("object1");
 
       final myKeyPair = await encryptionService.generateKeyPair();
       final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
       final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
       await _localStorageService.saveKeyPair(mapKeyPair);
+      print("object2");
 
       final user = UserModel(
         id: firebaseUser.uid,
@@ -103,7 +107,13 @@ class AuthenticationRepository {
         docId: user.id,
         data: user.toMap(),
       );
-      await _localStorageService.saveUser(user);
+
+      try {
+        await _localStorageService.saveUser(user);
+      } catch (e, st) {
+        print('🔥 LocalStorage.saveUser failed: $e\n$st');
+        rethrow;
+      }
       return user;
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthError(e);
@@ -172,7 +182,10 @@ class AuthenticationRepository {
         final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
         await _localStorageService.saveKeyPair(mapKeyPair);
 
-        await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKey", value: myPublicKey);
+        await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKeyInfo", value:  {
+          'publicKey': myPublicKey,
+          'Date': DateTime.now().toUtc().toIso8601String(),
+        });
 
       }
 

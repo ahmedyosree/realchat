@@ -46,13 +46,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.name,
         event.nickname,
       );
+      print(user);
+      print("user");
+
       emit(AuthSuccess(user!, welcomeMessage: 'Welcome, ${user.email}!'));
     } on AuthException catch (e) {
-
+      print('🚩 AuthException: ${e.code} – ${e.message}');
       emit(RegisterFailure(e.message));
-    } catch (e) {
-
-      emit(RegisterFailure('Registration failed. Please try again.'));
+    } catch (e, st) {
+      print('🚩 Unexpected register error: $e\n$st');
+      emit(RegisterFailure('Registration failed: ${e.toString()}'));
     }
   }
 

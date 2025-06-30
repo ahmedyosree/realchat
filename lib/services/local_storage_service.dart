@@ -43,26 +43,6 @@ class LocalStorageService {
     return Map<String, String>.from(json.decode(keyPairJson));
   }
 
-  /// Save or update the shared secret for a specific chat
-  Future<void> saveSharedSecret(String chatId, String secretString) async {
-    final all = await _getSharedSecretsMap();
-    all[chatId] = secretString;
-    await _prefs.setString(_sharedSecretsPrefsKey, json.encode(all));
-  }
-
-  /// Retrieve the shared secret for a specific chat, or null if absent
-  Future<String?> getSharedSecret(String chatId) async {
-    final all = await _getSharedSecretsMap();
-    return all[chatId];
-  }
-
-  /// Internal helper to decode the shared-secrets JSON map
-  Future<Map<String, String>> _getSharedSecretsMap() async {
-    final jsonString = _prefs.getString(_sharedSecretsPrefsKey);
-    if (jsonString == null) return {};
-    final Map<String, dynamic> decoded = json.decode(jsonString);
-    return decoded.map((k, v) => MapEntry(k, v as String));
-  }
 }
 
 

@@ -5,6 +5,7 @@ import '../features/auth/presentation/view/home_page.dart';
 import '../features/auth/presentation/view/login_page.dart';
 import '../features/auth/presentation/view/setup_profile_page.dart';
 import '../features/auth/presentation/view/signup_page.dart';
+import '../features/chat/presentation/messages_list_view.dart';
 
 class AppRouter extends StatefulWidget {
   const AppRouter({super.key});
@@ -50,6 +51,11 @@ class _AppRouterState extends State<AppRouter> {
           path: '/signup',
           name: 'signup',
           builder: (context, state) => const SignUpScreen(),
+        ),
+        GoRoute(
+          path: '/messages',
+          name: 'messages',
+          builder: (context, state) => const ChatRoomScreen(),
         ),
       ],
     );

@@ -69,4 +69,17 @@ class LocalChatsService {
       }).toList();
     });
   }
+
+  Future<Chat?> getChatById(String id) async {
+    final row = await (_db.select(_db.chatTable)
+      ..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
+    if (row == null) return null;
+    return Chat(
+      id: row.id,
+      people: (jsonDecode(row.people) as List<dynamic>).cast<String>(),
+      chatStartIn: row.chatStartedAt,
+    );
+  }
+
 }

@@ -8,9 +8,9 @@ import '../../../../core/constants/widgets/auth_button.dart';
 import '../../../../core/constants/widgets/auth_text_field.dart';
 import '../../../../core/constants/widgets/social_login_button.dart';
 import '../../../chat/bloc/chat_bloc.dart';
-import '../../logic/bloc/auth_bloc.dart';
-import '../../logic/bloc/auth_event.dart';
-import '../../logic/bloc/auth_state.dart';
+import '../../bloc/auth_bloc.dart';
+import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -61,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state is AuthSuccess) {
             print("7");
             context.go('/home');
-            context.read<ChatBloc>().add(GetChatsEvent());
             if (state.welcomeMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.welcomeMessage!)),
@@ -127,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {
                               // Add forgot password functionality
                             },
-                            child: Text(
+                            child: const Text(
                               'Forgot Password?',
                               style: TextStyle(color: AppColors.button),
                             ),
@@ -154,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const Text("Don't have an account?"),
                             TextButton(
                               onPressed: () => context.push('/signup'),
-                              child: Text(
+                              child: const Text(
                                 'Sign Up',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,

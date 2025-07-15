@@ -38,17 +38,19 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       emit(SearchInitial());
       return;
     }
+    final myID = _searchRepository.myUserId;
 
-    emit(SearchLoading());
+    emit(SearchLoading(myID));
 
     try {
       final users = await _searchRepository.searchUsersByNickname(
         event.query,
 
       );
-      emit(SearchLoaded(users));
+
+      emit(SearchLoaded(users , myID));
     } catch (e) {
-      emit(SearchError('Failed to load search results: ${e.toString()}'));
+      emit(SearchError('Failed to load search results: ${e.toString()}' , myID) );
     }
   }
 

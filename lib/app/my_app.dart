@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realchat/services/firebase_firestore_user_service.dart';
 
 import '../features/auth/data/repositories/authentication_repository.dart';
-import '../features/auth/logic/bloc/auth_bloc.dart';
-import '../features/auth/logic/bloc/auth_event.dart';
+import '../features/auth/bloc/auth_bloc.dart';
+import '../features/auth/bloc/auth_event.dart';
 import '../features/chat/bloc/chat_bloc.dart';
 import '../features/chat/data/repositories/chat_repositories.dart';
 import '../features/search/bloc/search_bloc.dart';
@@ -43,7 +43,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => SearchBloc(
-            searchRepository: SearchRepository(fireStoreService: fireStoreService),
+            searchRepository: SearchRepository(fireStoreService: fireStoreService,
+              localStorageService: localStorageService,
+            ),
           ),
         ),
         BlocProvider(

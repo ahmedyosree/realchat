@@ -11,7 +11,11 @@ class ChatListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChatBloc, ChatState>(
-
+      // Only rebuild when we enter the “StartGettingChats” state (new data)
+      // or the “GettingChatsFailure” state (show an error).
+      buildWhen: (previous, current) {
+        return current is StartGettingChats || current is GettingChatsFailure;
+      },
       builder: (context, state) {
         if (state is GettingChatsFailure) {
           return Center(
@@ -35,7 +39,7 @@ class ChatListWidget extends StatelessWidget {
             itemBuilder: (context, index) {
               final chatPreview = chats[index];
               return _ChatItem(chatPreview: chatPreview, onTap: () {
-                context.go('/messages');
+                context.push('/messages');
                 context.read<ChatBloc>().add(GetMessagesEvent(chatPreview.chatId, chatPreview.name, chatPreview.nickname));
               });
             },

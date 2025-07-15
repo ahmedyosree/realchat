@@ -6,9 +6,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/widgets/auth_button.dart';
 import '../../../../core/constants/widgets/auth_text_field.dart';
 import '../../../../core/constants/widgets/social_login_button.dart';
-import '../../logic/bloc/auth_bloc.dart';
-import '../../logic/bloc/auth_event.dart';
-import '../../logic/bloc/auth_state.dart';
+import '../../bloc/auth_bloc.dart';
+import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

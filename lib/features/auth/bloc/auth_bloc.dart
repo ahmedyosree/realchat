@@ -1,5 +1,5 @@
 import '../../../../core/exceptions/auth_exception.dart';
-import '../../data/repositories/authentication_repository.dart';
+import '../data/repositories/authentication_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,7 +65,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final result = await _authRepository.signInWithGoogle();
-
       if (result?.userModel != null) {
         await Future.delayed(const Duration(milliseconds: 300));
         emit(AuthSuccess(

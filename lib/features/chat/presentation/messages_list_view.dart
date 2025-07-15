@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/models/Local_Message.dart';
 import '../bloc/chat_bloc.dart';
 
@@ -9,15 +10,22 @@ class ChatRoomScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChatBloc, ChatState>(
+      // Only rebuild when we enter the loading or failure states:
+      buildWhen: (previous, current) {
+        return current is StartGettingMessages
+            || current is GettingMessagesFailure;
+      },
       builder: (context, state) {
         if (state is StartGettingMessages) {
-          return _buildChatScreen(state);
+          return _buildChatScreen(state , context);
         } else if (state is GettingMessagesFailure) {
           return Scaffold(
             appBar: AppBar(title: const Text('Error')),
             body: Center(child: Text('Error: ${state.error}')),
           );
         }
+        // this fallback will never be shown if buildWhen blocks
+        // all other states—but you can keep it as a safety net:
         return const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         );
@@ -25,12 +33,15 @@ class ChatRoomScreen extends StatelessWidget {
     );
   }
 
-  Scaffold _buildChatScreen(StartGettingMessages state) {
+  Scaffold _buildChatScreen(StartGettingMessages state , BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back), onPressed: () {  },
-          //onPressed: () => Navigator.of(state.context).pop(),
+          icon: const Icon(Icons.arrow_back), onPressed: () {
+          context.read<ChatBloc>().add(StopGettingMessagesEvent());
+          context.pop();
+        },
+          
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

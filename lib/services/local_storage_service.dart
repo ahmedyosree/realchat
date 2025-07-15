@@ -12,7 +12,19 @@ class LocalStorageService {
   LocalStorageService(this._prefs);
 
   Future<void> saveUser(UserModel user) async {
-    await _prefs.setString('userData', json.encode(user.toMap()));
+
+
+    await _prefs.setString('userData', json.encode( {
+      'id': user.id,
+      'email': user.email,
+      'name': user.name,
+      'nickname': user.nickname,
+      'signInTime': DateTime.now().toIso8601String(),
+      'publicKeyInfo': {
+        'publicKey': user.publicKeyInfo['publicKey'],
+        'Date': DateTime.now().toIso8601String() ,
+      },
+    }));
     await _prefs.setBool('isLoggedIn', true);
   }
 

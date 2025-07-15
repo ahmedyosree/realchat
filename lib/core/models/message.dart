@@ -25,7 +25,7 @@ class Message extends Equatable {
       senderId: map['senderId'] as String,
       encryptedData: map['encryptedData'] as Map<String, dynamic>,
       //    encryptedData: Map<String, dynamic>.from(map['encryptedData'] as Map),
-      sentAt: (map['sentAt'] as Timestamp).toDate(),
+      sentAt: (map['sentAt'] as Timestamp).toDate().toLocal(),
       chatId: map['chatId'] as String,
 
     );
@@ -36,7 +36,7 @@ class Message extends Equatable {
     return {
       'senderId': senderId,
       'encryptedData': encryptedData,
-      'sentAt':Timestamp.fromDate(sentAt),
+      'sentAt':FieldValue.serverTimestamp(),
       'chatId': chatId,
     };
   }

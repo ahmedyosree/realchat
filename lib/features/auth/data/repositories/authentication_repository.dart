@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/encryption_service.dart';
@@ -52,11 +53,12 @@ class AuthenticationRepository {
 
         await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKeyInfo", value:  {
           'publicKey': myPublicKey,
-          'Date': DateTime.now().toUtc().toIso8601String(),
+          'Date': FieldValue.serverTimestamp(),
         });
       }
 
       final user = UserModel.fromMap(docSnapshot.data()!);
+
       await _localStorageService.saveUser(user);
       return user;
     } on FirebaseAuthException catch (e) {
@@ -151,11 +153,17 @@ class AuthenticationRepository {
         },
 
       );
+
       await _fireStoreService.setDocument(
 
         docId: user.id,
         data: user.toMap(),
       );
+
+
+      print("test test test test ");
+      print(DateTime.now().toUtc().toIso8601String());
+      print(user.signInTime);
       await _localStorageService.saveUser(user);
       return user;
     } on FirebaseAuthException catch (e) {
@@ -175,6 +183,11 @@ class AuthenticationRepository {
         docId: firebaseUser.uid,
       );
 
+      if (!docSnapshot.exists || docSnapshot.data() == null) {
+        // No Firestore document → return GoogleSignInResult with only firebaseUser
+        return GoogleSignInResult(firebaseUser: firebaseUser);
+      }
+
       final keyPairMap = await _localStorageService.getKeyPair();
       if(keyPairMap == null){
         final myKeyPair = await encryptionService.generateKeyPair();
@@ -184,15 +197,13 @@ class AuthenticationRepository {
 
         await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKeyInfo", value:  {
           'publicKey': myPublicKey,
-          'Date': DateTime.now().toUtc().toIso8601String(),
+          'Date': FieldValue.serverTimestamp(),
         });
 
+
       }
 
-      if (!docSnapshot.exists || docSnapshot.data() == null) {
-        // No Firestore document → return GoogleSignInResult with only firebaseUser
-        return GoogleSignInResult(firebaseUser: firebaseUser);
-      }
+
 
       final userModel = UserModel.fromMap(docSnapshot.data()!);
       await _localStorageService.saveUser(userModel);

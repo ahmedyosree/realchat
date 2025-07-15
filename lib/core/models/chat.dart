@@ -15,7 +15,7 @@ class Chat extends Equatable {
     return Chat(
       id: map['id'] as String,
       people: List<String>.from(map['people'] ?? []),
-      chatStartIn: (map['chatStartIn'] as Timestamp).toDate(),
+      chatStartIn: (map['chatStartIn'] as Timestamp).toDate().toLocal(),
     );
   }
 
@@ -23,7 +23,7 @@ class Chat extends Equatable {
     return {
       'id': id,
       'people': people,
-      'chatStartIn':Timestamp.fromDate(chatStartIn),
+      'chatStartIn':FieldValue.serverTimestamp(),
     };
   }
 

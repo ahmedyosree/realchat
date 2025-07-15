@@ -1,21 +1,28 @@
 
 import '../../../../core/models/user.dart';
 import '../../../../services/firebase_firestore_user_service.dart';
+import '../../../../services/local_storage_service.dart';
 
 
 class SearchRepository {
   final FireStoreUserService _fireStoreService;
+  final LocalStorageService _localStorageService;
 
   SearchRepository({
     required FireStoreUserService fireStoreService,
-  }) : _fireStoreService = fireStoreService;
+    required LocalStorageService localStorageService,
+  }) : _fireStoreService = fireStoreService ,
+        _localStorageService = localStorageService;
 
   // Global cache for all fetched users
   var users = <UserModel>[];
+  // my id
+  String get myUserId => _localStorageService.getUser()!.id;
 
   // Map to track if a query (by nickname prefix) is fully fetched.
   // When set to true, it means no additional matching users exist in Firebase.
   final Map<String, bool> _fullyFetchedQueries = {};
+
   bool isQueryFullyFetched(String query) {
     // Check if any prefix of the current query is fully fetched.
     for (var key in _fullyFetchedQueries.keys) {

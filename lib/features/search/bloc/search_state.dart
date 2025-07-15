@@ -4,6 +4,7 @@ sealed class SearchState extends Equatable {
 }
 
 final class SearchInitial extends SearchState {
+
   const SearchInitial() : super();
 
   @override
@@ -12,28 +13,31 @@ final class SearchInitial extends SearchState {
 
 final class SearchLoading extends SearchState {
   final List<UserModel>? previousResults;
+  final String myUserId;
 
-  const SearchLoading({this.previousResults}) : super();
+  const SearchLoading(this.myUserId , {this.previousResults}) : super();
 
   @override
-  List<Object?> get props => [previousResults];
+  List<Object?> get props => [previousResults , myUserId];
 }
 
 final class SearchLoaded extends SearchState {
   final List<UserModel> users;
+  final String myUserId;
 
-  const SearchLoaded(this.users) : super();
+  const SearchLoaded(this.users , this.myUserId) : super();
 
   @override
-  List<Object> get props => [users];
+  List<Object> get props => [users, myUserId];
 }
 
 final class SearchError extends SearchState {
   final String message;
   final List<UserModel>? previousResults;
+  final String myUserId;
 
-  const SearchError(this.message, {this.previousResults}) : super();
+  const SearchError(this.message , this.myUserId, {this.previousResults }) : super();
 
   @override
-  List<Object?> get props => [message, previousResults];
+  List<Object?> get props => [message, previousResults, myUserId];
 }

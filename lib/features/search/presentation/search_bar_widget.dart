@@ -12,7 +12,6 @@ class SearchBarWidget extends StatefulWidget {
 
 class _SearchBarWidgetState extends State<SearchBarWidget> {
   late final FocusNode _focusNode;
-
   @override
   void initState() {
     super.initState();
@@ -74,6 +73,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   Widget _buildSearchResults() {
     return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) => switch (state) {
+
         SearchInitial() => const Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
@@ -81,11 +81,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ),
-        SearchLoading(previousResults: final prev) => Container(
+        SearchLoading(previousResults: final prev , myUserId: final myUserId) => Container(
           constraints: const BoxConstraints(minHeight: 100),
           child: Stack(
             children: [
-              if (prev != null) _SearchResults(users: prev),
+              if (prev != null) _SearchResults(users: prev , myUserId: myUserId),
               const Align(
                 alignment: Alignment.center,
                 child: CircularProgressIndicator(),
@@ -93,11 +93,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             ],
           ),
         ),
-        SearchLoaded(users: final users) => _SearchResults(users: users),
-        SearchError(message: final message, previousResults: final prev) => Column(
+        SearchLoaded(users: final users , myUserId: final myUserId) => _SearchResults(users: users , myUserId: myUserId),
+        SearchError(message: final message, previousResults: final prev , myUserId: final myUserId) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (prev != null) _SearchResults(users: prev),
+            if (prev != null) _SearchResults(users: prev , myUserId: myUserId),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -119,8 +119,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
 class _SearchResults extends StatelessWidget {
   final List<UserModel> users;
-
-  const _SearchResults({required this.users});
+  final String myUserId;
+  const _SearchResults({required this.users , required this.myUserId});
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +171,9 @@ class _SearchResults extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[600]),
               ),
               // Add a trailing button for starting a chat.
-              trailing: ElevatedButton(
+              trailing:user.id == myUserId
+                  ? null   // ← no button if it’s me
+                  :  ElevatedButton(
                 onPressed: () {
                   // Open a bottom sheet to prompt for the first message.
                   showModalBottomSheet(
@@ -224,7 +226,7 @@ class _SearchResults extends StatelessWidget {
                     },
                   );
                 },
-                child: const Text("Chat"),
+                child: const Text("Start Chat"),
               ),
 
 

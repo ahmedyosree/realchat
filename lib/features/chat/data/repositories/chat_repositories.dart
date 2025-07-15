@@ -128,7 +128,7 @@ class ChatRepository {
 
     // If no chats exist locally, use a very old date
     final Timestamp since = Timestamp.fromDate(
-        latestChatTime ?? DateTime.fromMillisecondsSinceEpoch(0).toUtc());
+        latestChatTime ?? DateTime.fromMillisecondsSinceEpoch(0));
 
     _firestoreChatsSubscription = _firestoreChatService
         .streamUserChats(currentUserId, since)
@@ -142,7 +142,6 @@ class ChatRepository {
   /// Start listening to ALL chats, fetching each friend's public key,
   /// deriving a shared secret per-chat, then streaming & decrypting new messages.
   void startMessageSync() async {
-    // User Public Key Info
     final String currentUserId = myUserId;
     final myInfo =
         await _fireStoreUserService.getPublicKeyInfoOnce(currentUserId);
@@ -154,41 +153,42 @@ class ChatRepository {
         .expand((chats) => chats)
         .distinctUnique();
 
-    final Stream<Message> encryptedMessagesStream = chatsStream
-        .flatMap((chat) async* {
-          // for every chat , listen to a stream that emit public key for the other person in that chat
-          // and make shared secret key and save it in the map to used for decrypt the messages.
-          if (!_sharedSecretKeys.containsKey(chat.id)) {
-            final Map<String, String>? myMapKeyPair =
-                await _localStorageService.getKeyPair();
-            if (myMapKeyPair == null) {
-              throw StateError('No X25519 key pair found in local storage.');
-            }
-            _publicKeySubs.add(_fireStoreUserService
-                .streamPublicKeyInfo(chat.people.firstWhere(
-                    (id) => id != myUserId))
-                .listen((publicKeyFriendInfo) => encryptionService
-                        .computedAesKey(
-                            friendPublicKeyStr:
-                                publicKeyFriendInfo['publicKey'],
-                            chatId: chat.id,
-                            myMapKeyPair: myMapKeyPair)
-                        .then((secretKey) {
-                      _sharedSecretKeys[chat.id] =
-                          (secretKey, publicKeyFriendInfo['Date'] as DateTime);
-                    })));
-          }
+    final encryptedMessagesStream = chatsStream
+        .flatMap((chat) {
+      final friendId =
+      chat.people.firstWhere((id) => id != myUserId);
 
-          // 1) await the most‐recent‐time future
-          final lastSeen =
-              await localMessagesService.getMostRecentMessageTime(chat.id)
-                  // decide on a fallback if it was null
-                  ??
-                  DateTime.fromMillisecondsSinceEpoch(0).toUtc();
-          //streamMessages return Stream<List<Message>>
-          // 2) yield all messages from your Firestore stream.
-          yield* _firestoreChatService.streamMessages(chat.id, lastSeen);
-        })
+      // Every time Firestore pushes a new publicKeyInfo, switch to a fresh message stream:
+      return _fireStoreUserService
+          .streamPublicKeyInfo(friendId)
+          .switchMap((publicKeyInfo) async* {
+        // 1) Compute & store your shared key
+        final myKeyPair = await _localStorageService.getKeyPair();
+        if (myKeyPair == null) {
+          throw StateError('No X25519 key pair in local storage.');
+        }
+        final secretKey = await encryptionService.computedAesKey(
+          friendPublicKeyStr: publicKeyInfo['publicKey'],
+          chatId: chat.id,
+          myMapKeyPair: myKeyPair,
+        );
+        _sharedSecretKeys[chat.id] = (
+        secretKey,
+        publicKeyInfo['Date'] as DateTime,
+        );
+
+
+        final t = await localMessagesService
+            .getMostRecentMessageTime(chat.id)
+            ?? DateTime.fromMillisecondsSinceEpoch(0);
+        // 2) Figure out how far you’ve read already
+        final lastSeenTs = Timestamp.fromDate(t.toUtc());
+
+        // 3) Yield only the “new” messages under this key
+        yield* _firestoreChatService
+            .streamMessages(chat.id, lastSeenTs);
+      });
+    })
         .expand((messages) => messages)
         .distinctUnique();
 
@@ -198,8 +198,13 @@ class ChatRepository {
         // this break will cancel the underlying StreamSubscription
         break;
       }
-      if (message.sentAt.isAfter(_sharedSecretKeys[message.chatId]?.$2 ??
-              DateTime.fromMillisecondsSinceEpoch(0)) &&
+      print("message received");
+      print(message.sentAt.toString());
+      print(_sharedSecretKeys[message.chatId]?.$2);
+      print( message.sentAt.isAfter(myKeyTime));
+      print("/////////////////////////");
+
+      if (message.sentAt.isAfter(_sharedSecretKeys[message.chatId]!.$2) &&
           message.sentAt.isAfter(myKeyTime)) {
         SecretBox secretBox =
             encryptionService.secretBoxFromMap(message.encryptedData);
@@ -218,15 +223,16 @@ class ChatRepository {
           id: message.id,
           senderId: "System",
           text:
-              '“To help keep your chat private, your conversation is now using a new secure key. '
-              'The last message couldn’t be delivered, ask your friend to resend anything important!”',
-          sentAt: message.sentAt.subtract(const Duration(milliseconds: 500)),
+              '“error',
+          sentAt: message.sentAt,
           chatId: message.chatId,
         );
         localMessagesService.saveMessage(localMessage);
       }
     }
   }
+
+
 
   /// Don’t forget to cancel when you no longer need it!
   Future<void> stopMessageSync() async {

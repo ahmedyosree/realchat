@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../logic/bloc/auth_bloc.dart';
-import '../../logic/bloc/auth_event.dart';
-import '../../logic/bloc/auth_state.dart';
+import '../../bloc/auth_bloc.dart';
+import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
 
 class SetupProfileScreen extends StatefulWidget {
   const SetupProfileScreen({super.key});
@@ -24,7 +24,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
-          Navigator.pushReplacementNamed(context, '/home');
+          context.go('/home');
           print("10");
         } else if (state is AuthFailure) {
           print("11");

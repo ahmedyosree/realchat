@@ -17,27 +17,6 @@ class LocalMessage extends Equatable{
   });
 
 
-
-  factory LocalMessage.fromMap(Map<String, dynamic> map) {
-    return LocalMessage(
-      id: map['id'] as String,
-      chatId: map['chatId'] as String,
-      senderId: map['senderId'] as String,
-      text: map['text'] as String,
-      sentAt:( map['sentAt'] as Timestamp).toDate(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'chatId': chatId,
-      'senderId': senderId,
-      'text': text,
-      'sentAt': Timestamp.fromDate(sentAt),
-    };
-  }
-
   @override
   List<Object?> get props => [id , chatId, senderId, text, sentAt];
 

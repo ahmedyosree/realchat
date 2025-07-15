@@ -95,7 +95,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       SendMessage event,
       Emitter<ChatState> emit,
       ) async {
-    emit(StartNewChatInProgress());
     try {
       await chatRepository.addNewMessage(event.text, event.chatId);
     } catch (error) {
@@ -123,6 +122,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       MessagesUpdated event,
       Emitter<ChatState> emit,
       ) async {
+    print("is do ???");
+    print(event.messages.length);
+
     emit(StartGettingMessages(messages: event.messages , myId: chatRepository.myUserId , name: event.name , nickname: event.nickname , chatId: event.chatId));
   }
 

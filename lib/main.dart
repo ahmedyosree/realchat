@@ -10,12 +10,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/firebase_firestore_user_service.dart';
 import 'app/my_app.dart';
 import 'core/constants/firebase_options.dart';
-import 'features/auth/logic/bloc/auth_bloc_observer.dart';
+import 'core/auth_bloc_observer.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Bloc.observer = AuthBlocObserver();
+  Bloc.observer = AppBlocObserver ();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final localStorageService = LocalStorageService(prefs);

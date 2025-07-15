@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 
@@ -28,10 +29,14 @@ class UserModel extends Equatable {
       email: map['email'] as String,
       name: map['name'] as String,
       nickname: map['nickname'] as String,
-      signInTime: DateTime.parse((map['signInTime'] as String)),
+      signInTime: (map['signInTime'] is String)
+          ? DateTime.parse(map['signInTime'] as String).toLocal()
+          : (map['signInTime'] as Timestamp).toDate().toLocal(),
       publicKeyInfo: {
         'publicKey': pkInfo?['publicKey'] as String,
-        'Date':  DateTime.parse((pkInfo?['Date'] as String)),
+        'Date':  (pkInfo?['Date'] is String)
+            ? DateTime.parse(pkInfo?['Date'] as String).toLocal()
+            :(pkInfo?['Date'] as Timestamp).toDate().toLocal(),
       },
     );
   }
@@ -43,10 +48,10 @@ class UserModel extends Equatable {
       'email': email,
       'name': name,
       'nickname': nickname,
-      'signInTime': signInTime.toIso8601String(),
+      'signInTime': FieldValue.serverTimestamp(),
       'publicKeyInfo': {
         'publicKey': publicKeyInfo['publicKey'],
-        'Date': publicKeyInfo['Date'].toIso8601String() ,
+        'Date': FieldValue.serverTimestamp() ,
       },
     };
   }

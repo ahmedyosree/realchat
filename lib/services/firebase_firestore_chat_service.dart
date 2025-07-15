@@ -40,7 +40,7 @@ class FireStoreChatService {
 
 
   /// Stream all messages in chat [chatId] whose timestamp is *after* [since].
-  Stream<List<Message>> streamMessages(String chatId, DateTime since) {
+  Stream<List<Message>> streamMessages(String chatId, Timestamp since) {
     return _firestore
         .collection(collectionPath)
         .doc(chatId)

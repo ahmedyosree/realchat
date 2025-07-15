@@ -4,12 +4,24 @@ import 'package:go_router/go_router.dart';
 import '../../../chat/bloc/chat_bloc.dart';
 import '../../../chat/presentation/chat_list_view.dart';
 import '../../../search/presentation/search_bar_widget.dart';
-import '../../logic/bloc/auth_bloc.dart';
-import '../../logic/bloc/auth_event.dart';
-import '../../logic/bloc/auth_state.dart';
+import '../../bloc/auth_bloc.dart';
+import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // as soon as the widget is “inited”, fire your chat-loading event:
+    context.read<ChatBloc>().add(GetChatsEvent());
+  }
 
   @override
   Widget build(BuildContext context) {

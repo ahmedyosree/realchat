@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
@@ -142,10 +143,14 @@ class ChatRepository {
   /// Start listening to ALL chats, fetching each friend's public key,
   /// deriving a shared secret per-chat, then streaming & decrypting new messages.
   void startMessageSync() async {
+    final sw = Stopwatch()..start();
     final String currentUserId = myUserId;
     final myInfo =
         await _fireStoreUserService.getPublicKeyInfoOnce(currentUserId);
     final myKeyTime = myInfo['Date'] as DateTime;
+    debugPrint('✈️ getPublicKeyInfoOnce: ${sw.elapsedMilliseconds} ms');
+    sw.reset();
+
 
     // take stream of list<chat> and return stream of chat that every chat will not be repeated.
     final Stream<Chat> chatsStream = localChatsService
@@ -167,11 +172,15 @@ class ChatRepository {
         if (myKeyPair == null) {
           throw StateError('No X25519 key pair in local storage.');
         }
+        final secretKeySw = Stopwatch()..start();
+
         final secretKey = await encryptionService.computedAesKey(
           friendPublicKeyStr: publicKeyInfo['publicKey'],
           chatId: chat.id,
           myMapKeyPair: myKeyPair,
         );
+        debugPrint('✈️ computedAesKey: ${secretKeySw.elapsedMilliseconds} ms');
+        secretKeySw.reset();
         _sharedSecretKeys[chat.id] = (
         secretKey,
         publicKeyInfo['Date'] as DateTime,
@@ -182,6 +191,7 @@ class ChatRepository {
             .getMostRecentMessageTime(chat.id)
             ?? DateTime.fromMillisecondsSinceEpoch(0);
         // 2) Figure out how far you’ve read already
+
         final lastSeenTs = Timestamp.fromDate(t.toUtc());
 
         // 3) Yield only the “new” messages under this key
@@ -198,6 +208,8 @@ class ChatRepository {
         // this break will cancel the underlying StreamSubscription
         break;
       }
+      final decSw = Stopwatch()..start();
+
       print("message received");
       print(message.sentAt.toString());
       print(_sharedSecretKeys[message.chatId]?.$2);
@@ -223,12 +235,14 @@ class ChatRepository {
           id: message.id,
           senderId: "System",
           text:
-              '“error',
+              "This message can't be decrypted. The encryption keys have changed.",
           sentAt: message.sentAt,
           chatId: message.chatId,
         );
         localMessagesService.saveMessage(localMessage);
       }
+      debugPrint('✈️ decryptMessage: ${decSw.elapsedMilliseconds} ms');
+
     }
   }
 

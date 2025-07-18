@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../app_colors.dart';
-
 class CustomTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -26,8 +25,13 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       obscureText: isPassword ? (obscureText ?? false) : false,
+      style: const TextStyle(color: AppColors.inputText),
       decoration: InputDecoration(
+        filled: true,
+        fillColor: AppColors.inputBg,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         labelText: label,
+        labelStyle: const TextStyle(color: AppColors.inputHint),
         prefixIcon: Icon(icon, color: AppColors.accent),
         suffixIcon: isPassword
             ? IconButton(
@@ -39,10 +43,24 @@ class CustomTextFormField extends StatelessWidget {
         )
             : null,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.button),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.inputBorder, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.red.shade700),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.red.shade700, width: 2),
         ),
       ),
       validator: validator,

@@ -23,8 +23,9 @@ class ChatInitial extends ChatState {}
 
 class StartGettingChats extends ChatState {
   final List<ChatPreview> chatPreview;
+  final String myId;
 
-  const StartGettingChats({this.chatPreview = const []});
+  const StartGettingChats({this.chatPreview = const [] , required this.myId} );
 
   @override
   List<Object> get props => [chatPreview];

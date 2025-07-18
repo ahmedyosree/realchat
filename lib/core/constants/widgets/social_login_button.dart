@@ -6,28 +6,40 @@ import '../app_colors.dart';
 class GoogleSignInButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const GoogleSignInButton({super.key, required this.onPressed});
+  const GoogleSignInButton({ super.key, required this.onPressed });
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      icon: const FaIcon(
-        FontAwesomeIcons.google,
-        color: AppColors.googleIcon,
-        size: 24,
-      ),
-      label: const Text(
-        'Sign in with Google',
-        style: TextStyle(color: Colors.black87),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+    return SizedBox(
+      width: double.infinity,
+      child: Material(
+        elevation: 2,
+        borderRadius: BorderRadius.circular(10),
+        child: OutlinedButton.icon(
+          onPressed: onPressed,
+          icon: const FaIcon(
+            FontAwesomeIcons.google,
+            color: AppColors.googleIcon,
+            size: 20,
+          ),
+          label: const Text(
+            'Sign in with Google',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            side: BorderSide(color: AppColors.divider, width: 1.2),
+          ),
         ),
-        side: BorderSide(color: AppColors.accent),
       ),
-      onPressed: onPressed,
     );
   }
 }

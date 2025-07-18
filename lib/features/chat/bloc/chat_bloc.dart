@@ -70,7 +70,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ChatsUpdated event,
       Emitter<ChatState> emit,
       ) async {
-    emit(StartGettingChats(chatPreview: event.chatsChatPreview));
+    emit(StartGettingChats(chatPreview: event.chatsChatPreview , myId: chatRepository.myUserId));
   }
 
   Future<void> _onStopGettingChats(

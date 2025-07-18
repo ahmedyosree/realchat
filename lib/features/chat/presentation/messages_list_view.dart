@@ -33,23 +33,43 @@ class ChatRoomScreen extends StatelessWidget {
     );
   }
 
-  Scaffold _buildChatScreen(StartGettingMessages state , BuildContext context) {
+  Scaffold _buildChatScreen(StartGettingMessages state, BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5), // Soft light background
       appBar: AppBar(
+        elevation: 1,
+        backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back), onPressed: () {
-          context.read<ChatBloc>().add(StopGettingMessagesEvent());
-          context.pop();
-        },
-          
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            context.read<ChatBloc>().add(StopGettingMessagesEvent());
+            context.pop();
+          },
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        titleSpacing: 0,
+        title: Row(
           children: [
-            Text(state.name),
-            Text(
-              state.nickname,
-              style: const TextStyle(fontSize: 14, color: Colors.white70),
+            const CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white24,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.name,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  '@${state.nickname}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -62,7 +82,22 @@ class ChatRoomScreen extends StatelessWidget {
               myId: state.myId,
             ),
           ),
-          _MessageInput(state.chatId),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: _MessageInput(state.chatId),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -138,7 +173,7 @@ class MessagesListWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         final message = messages[messages.length - 1 - index];
         final isMe = message.senderId == myId;
-        final isSystem = message.senderId == 'system';
+        final isSystem = message.senderId == 'System';
 
         return MessageBubble(
           message: message,
@@ -165,33 +200,82 @@ class MessageBubble extends StatelessWidget {
   String _friendlyTime(DateTime timestamp) {
     final now = DateTime.now();
     final diff = now.difference(timestamp);
-    if (diff.inDays > 0) return "${diff.inDays}d ago";
-    if (diff.inHours > 0) return "${diff.inHours}h ago";
-    if (diff.inMinutes > 0) return "${diff.inMinutes}m ago";
+    if (diff.inDays > 0) return "${diff.inDays}d";
+    if (diff.inHours > 0) return "${diff.inHours}h";
+    if (diff.inMinutes > 0) return "${diff.inMinutes}m";
     return "now";
   }
 
   @override
   Widget build(BuildContext context) {
+    // Common container style
+    final bubble = ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.7,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSystem
+              ? Colors.yellow[200]
+              : isMe
+              ? Theme.of(context).primaryColor
+              : Colors.grey[200],
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: isMe || isSystem
+                ? const Radius.circular(16)
+                : const Radius.circular(4),
+            bottomRight: isMe
+                ? const Radius.circular(4)
+                : const Radius.circular(16),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment:
+          isSystem ? CrossAxisAlignment.center : CrossAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Text(
+                message.text,
+                textAlign: isSystem ? TextAlign.center : TextAlign.start,
+                style: TextStyle(
+                  color: isSystem
+                      ? Colors.brown[800]
+                      : isMe
+                      ? Colors.white
+                      : Colors.black87,
+                  fontSize: isSystem ? 12 : 16,
+                  fontStyle: isSystem ? FontStyle.italic : FontStyle.normal,
+                ),
+              ),
+            ),
+
+            // Always include a gap, but size it based on message type
+            SizedBox(width: isSystem ? 12 : 8),
+
+            Text(
+              _friendlyTime(message.sentAt),
+              style: TextStyle(
+                color: isSystem
+                    ? Colors.brown[600]?.withOpacity(0.7)
+                    : isMe
+                    ? Colors.white70
+                    : Colors.grey[600],
+                fontSize: isSystem ? 10 : 10,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
     if (isSystem) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.amber[100],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              message.text,
-              style: TextStyle(
-                color: Colors.brown[700],
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-        ),
+        child: Center(child: bubble),
       );
     }
 
@@ -200,52 +284,7 @@ class MessageBubble extends StatelessWidget {
       child: Row(
         mainAxisAlignment:
         isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isMe
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey[200],
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft:
-                  isMe ? const Radius.circular(16) : const Radius.circular(4),
-                  bottomRight:
-                  isMe ? const Radius.circular(4) : const Radius.circular(16),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.text,
-                    style: TextStyle(
-                      color: isMe ? Colors.white : Colors.black87,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Text(
-                      _friendlyTime(message.sentAt),
-                      style: TextStyle(
-                        color: isMe ? Colors.white70 : Colors.grey[600],
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        children: [bubble],
       ),
     );
   }

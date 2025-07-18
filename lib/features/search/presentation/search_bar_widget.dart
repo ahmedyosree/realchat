@@ -11,16 +11,18 @@ class SearchBarWidget extends StatefulWidget {
 }
 
 class _SearchBarWidgetState extends State<SearchBarWidget> {
-  late final FocusNode _focusNode;
+  late final TextEditingController _controller;
+
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
+    _controller = TextEditingController();
+
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -46,18 +48,26 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: TextField(
-        focusNode: _focusNode,
+        controller: _controller,
+        autofocus: false,
+
         onChanged: (query) {
           context.read<SearchBloc>().add(SearchQueryChanged(query));
         },
         decoration: InputDecoration(
-          hintText: "Search users...",
+          hintText: "Enter your friend's nickname...",
+          hintStyle: const TextStyle(
+            fontSize: 12, // Make it smaller
+            color: Colors.blueGrey, // Change the color
+            // You can add more properties here, e.g., fontWeight: FontWeight.w400
+          ),
           prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () {
+              _controller.clear();
               context.read<SearchBloc>().add(const SearchQueryChanged(''));
-              _focusNode.unfocus(); // This will hide the cursor
+              FocusScope.of(context).unfocus();
             },
           ),
           border: OutlineInputBorder(
@@ -75,17 +85,17 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       builder: (context, state) => switch (state) {
 
         SearchInitial() => const Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(10.0),
           child: Text(
-            "Start typing to search...",
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            "Search for friends by nickname to start chatting!",
+            style: TextStyle(fontSize: 13, color: Colors.grey),
           ),
         ),
         SearchLoading(previousResults: final prev , myUserId: final myUserId) => Container(
           constraints: const BoxConstraints(minHeight: 100),
           child: Stack(
             children: [
-              if (prev != null) _SearchResults(users: prev , myUserId: myUserId),
+              if (prev != null) _SearchResults(users: prev , myUserId: myUserId , searchController: _controller,),
               const Align(
                 alignment: Alignment.center,
                 child: CircularProgressIndicator(),
@@ -93,11 +103,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             ],
           ),
         ),
-        SearchLoaded(users: final users , myUserId: final myUserId) => _SearchResults(users: users , myUserId: myUserId),
+        SearchLoaded(users: final users , myUserId: final myUserId) => _SearchResults(users: users , myUserId: myUserId , searchController: _controller,),
         SearchError(message: final message, previousResults: final prev , myUserId: final myUserId) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (prev != null) _SearchResults(users: prev , myUserId: myUserId),
+            if (prev != null) _SearchResults(users: prev , myUserId: myUserId , searchController: _controller,),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -120,7 +130,9 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 class _SearchResults extends StatelessWidget {
   final List<UserModel> users;
   final String myUserId;
-  const _SearchResults({required this.users , required this.myUserId});
+  final TextEditingController searchController;
+
+  const _SearchResults({required this.users , required this.myUserId , required this.searchController,});
 
   @override
   Widget build(BuildContext context) {
@@ -175,13 +187,15 @@ class _SearchResults extends StatelessWidget {
                   ? null   // ← no button if it’s me
                   :  ElevatedButton(
                 onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  final TextEditingController controller = TextEditingController();
+
                   // Open a bottom sheet to prompt for the first message.
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
                     builder: (context) {
                       // Use a controller to capture the user's input.
-                      final TextEditingController _controller = TextEditingController();
                       return Padding(
                         padding: MediaQuery.of(context).viewInsets,
                         child: Padding(
@@ -190,7 +204,7 @@ class _SearchResults extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               TextField(
-                                controller: _controller,
+                                controller: controller,
                                 decoration: const InputDecoration(
                                   labelText: 'Enter your first message',
                                   border: OutlineInputBorder(),
@@ -199,7 +213,7 @@ class _SearchResults extends StatelessWidget {
                               const SizedBox(height: 16.0),
                               ElevatedButton(
                                 onPressed: () {
-                                  final String firstMessage = _controller.text.trim();
+                                  final String firstMessage = controller.text.trim();
                                   if (firstMessage.isNotEmpty) {
                                     final String friendId = user.id;
                                     final String friendKey= user.publicKeyInfo['publicKey'];
@@ -216,6 +230,12 @@ class _SearchResults extends StatelessWidget {
                                     // context.go('/chat/$friendId');
                                     Navigator.of(context).pop(); // Close the bottom sheet.
                                   }
+
+                                  context.read<SearchBloc>().add(const SearchQueryChanged(''));
+                                  searchController.clear();
+                                  FocusScope.of(context).unfocus();
+
+
                                 },
                                 child: const Text("Start Chat"),
                               ),

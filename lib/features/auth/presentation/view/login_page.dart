@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/widgets/auth_button.dart';
 import '../../../../core/constants/widgets/auth_text_field.dart';
+import '../../../../core/constants/widgets/logo.dart';
 import '../../../../core/constants/widgets/social_login_button.dart';
 import '../../../chat/bloc/chat_bloc.dart';
 import '../../bloc/auth_bloc.dart';
@@ -24,6 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -31,7 +35,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    FlutterNativeSplash.remove(); // This will now execute after the 3-second delay
 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +48,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: AppColors.button),
-            onPressed: () {
-              // Add language change functionality
-            },
-          ),
-        ],
+
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -80,13 +82,14 @@ class _LoginScreenState extends State<LoginScreen> {
           }else if (state is AuthInitial) {
             print("9.5");
             context.go('/login');
+
           }
         },
 
         child: Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: Center(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 500),
@@ -96,9 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 20),
-                        const Icon(Icons.lock, size: 80, color: AppColors.button),
-                        const SizedBox(height: 20),
+                      const AutoCrossFadeLogos(),
+
+                      const SizedBox(height: 20),
                         CustomTextFormField(
                           controller: _emailController,
                           label: 'Email',
@@ -128,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: const Text(
                               'Forgot Password?',
-                              style: TextStyle(color: AppColors.button),
+                              style: const TextStyle(color: AppColors.accent),
                             ),
                           ),
                         ),
@@ -155,15 +158,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () => context.push('/signup'),
                               child: const Text(
                                 'Sign Up',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.button,
+                                  color: AppColors.accent,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10),
                         if (isLargeScreen)
                           const Row(
                             children: [
@@ -177,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                         else
                           const Divider(),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         GoogleSignInButton(
                           onPressed: () {
                             context.read<AuthBloc>().add(SignInWithGoogleEvent());

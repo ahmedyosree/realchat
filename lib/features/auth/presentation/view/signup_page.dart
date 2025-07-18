@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/widgets/auth_button.dart';
 import '../../../../core/constants/widgets/auth_text_field.dart';
+import '../../../../core/constants/widgets/logo.dart';
 import '../../../../core/constants/widgets/social_login_button.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
@@ -40,21 +41,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: AppColors.button),
-            onPressed: () {
-              // Add language change functionality
-            },
-          ),
-        ],
+
       ),
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: Center(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 500),
@@ -64,8 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 20),
-                    const Icon(Icons.person_add, size: 80, color: AppColors.button),
+                    const AutoCrossFadeLogos(),
                     const SizedBox(height: 20),
                     CustomTextFormField(
                       controller: _nameController,
@@ -113,25 +106,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           : null,
                     ),
                     const SizedBox(height: 30),
-                    Column(
-                      children: [
-                        AuthButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<AuthBloc>().add(
-                                RegisterWithEmailEvent(
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text.trim(),
-                                  name: _nameController.text.trim(),
-                                  nickname: _nicknameController.text.trim(),
-                                ),
-                              );
-                            }
-                          },
-                          text: 'REGISTER',
-                        ),
-                      ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: AuthButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<AuthBloc>().add(
+                              RegisterWithEmailEvent(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                                name: _nameController.text.trim(),
+                                nickname: _nicknameController.text.trim(),
+                              ),
+                            );
+                          }
+                        },
+                        text: 'REGISTER',
+                      ),
                     ),
+
                     const SizedBox(height: 20),
                     if (isLargeScreen)
                       const Row(
@@ -161,7 +154,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             'Login',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.button,
+                              color: AppColors.accent,
                             ),
                           ),
                         ),

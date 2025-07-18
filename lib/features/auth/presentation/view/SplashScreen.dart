@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/widgets/logo.dart';
 import '../../../chat/bloc/chat_bloc.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_state.dart';
@@ -12,7 +15,8 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        print("1");
+        print("is");
+
         if (state is AuthSuccess) {
           print("whaaaart");
           print("2");
@@ -26,6 +30,8 @@ class SplashScreen extends StatelessWidget {
         } else if (state is AuthInitial) {
           print("4");
           context.go('/login');
+
+
         }
         else if (state is RegisterFailure) {
           print("4.5");
@@ -38,19 +44,28 @@ class SplashScreen extends StatelessWidget {
         }
         // Don't navigate if state is Loading or Initial
       },
-      child: const Scaffold(
+      child: Scaffold(
+        backgroundColor: AppColors.scaffoldBg,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Your app logo or branding here
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Loading...'),
-            ],
+          child: Text(
+            'Real Chat',
+            style: TextStyle(
+              fontSize:  40, // large and readable
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.3,
+              color: AppColors.accent,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+
     );
   }
 }

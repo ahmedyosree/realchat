@@ -67,7 +67,9 @@ class _AppRouterState extends State<AppRouter> {
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
       theme: ThemeData(
+        primaryColor: const Color(0xFF278164),
         primarySwatch: Colors.red,
+        scaffoldBackgroundColor: Colors.white,
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
             TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),

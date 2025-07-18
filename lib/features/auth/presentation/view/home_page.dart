@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import '../../../chat/bloc/chat_bloc.dart';
 import '../../../chat/presentation/chat_list_view.dart';
@@ -21,6 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // as soon as the widget is “inited”, fire your chat-loading event:
     context.read<ChatBloc>().add(GetChatsEvent());
+    FlutterNativeSplash.remove();
+
   }
 
   @override
@@ -33,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Home Screen'),
+          title: const Text('Home'),
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),
@@ -109,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'User Info',
+                          'your Info',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -118,16 +121,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         _buildUserInfoItem('Name', user.name),
                         const SizedBox(height: 8),
-                        _buildUserInfoItem('Email', user.email),
-                        const SizedBox(height: 8),
-                        _buildUserInfoItem('User ID', user.id),
+                         _buildUserInfoItem('Nickname', user.nickname),
+                            // You could also use SizedBox(width: 8) for spacing
+                        const SizedBox(height: 4),
+                        const Text(
+                          '*This is the name people will use to search for you.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
 
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                ChatListWidget()
+
+                Column(
+                  children: [
+                    // Remove explicit title - use visual hierarchy instead
+                    const SizedBox(height: 16), // Add some top padding
+                    ChatListWidget(),
+                  ],
+                )
               ],
             ),
           ),
@@ -141,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 80,
+          width: 100,
           child: Text(
             '$label:',
             style: const TextStyle(

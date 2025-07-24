@@ -13,6 +13,7 @@ class ChatTable extends Table {
   TextColumn get id => text()();
   TextColumn get people => text()(); // Store as JSON string
   DateTimeColumn get chatStartedAt => dateTime()();
+  TextColumn get startTheChatId => text()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -44,6 +45,7 @@ class LocalChatsService {
         id: Value(chat.id),
         people: Value(jsonEncode(chat.people)),
         chatStartedAt: Value(chat.chatStartIn),
+          startTheChatId : Value(chat.startTheChatId),
       ),
     );
   }
@@ -65,6 +67,8 @@ class LocalChatsService {
           id: row.id,
           people: (jsonDecode(row.people) as List<dynamic>).cast<String>(),
           chatStartIn: row.chatStartedAt,
+            startTheChatId : row.startTheChatId,
+
         );
       }).toList();
     });
@@ -79,6 +83,8 @@ class LocalChatsService {
       id: row.id,
       people: (jsonDecode(row.people) as List<dynamic>).cast<String>(),
       chatStartIn: row.chatStartedAt,
+      startTheChatId : row.startTheChatId,
+
     );
   }
 

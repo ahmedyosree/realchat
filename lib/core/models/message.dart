@@ -3,9 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Message extends Equatable {
   final String id;
   final String senderId;
-  // Instead of a plain text string, we store encrypted data as a Map.
-  // This map should contain keys like 'cipherText', 'nonce', and 'mac'
-  final Map<String, dynamic> encryptedData;
+
+  final String encryptedData;
   final DateTime sentAt;
   final String chatId;
 
@@ -23,7 +22,7 @@ class Message extends Equatable {
     return Message(
       id: documentId,
       senderId: map['senderId'] as String,
-      encryptedData: map['encryptedData'] as Map<String, dynamic>,
+      encryptedData: map['encryptedData'] as String,
       //    encryptedData: Map<String, dynamic>.from(map['encryptedData'] as Map),
       sentAt: (map['sentAt'] as Timestamp).toDate().toLocal(),
       chatId: map['chatId'] as String,

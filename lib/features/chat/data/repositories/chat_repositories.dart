@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:tuple/tuple.dart';
+import 'package:sodium/sodium.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/Local_Message.dart';
@@ -12,9 +12,10 @@ import '../../../../core/models/chat.dart';
 import '../../../../core/models/chat_preview.dart';
 import '../../../../core/models/message.dart';
 import '../../../../core/models/user.dart';
-import '../../../../services/encryption_service.dart';
+import '../../../../services/encryption_service2.dart';
 import '../../../../services/firebase_firestore_chat_service.dart';
 import '../../../../services/firebase_firestore_user_service.dart';
+import '../../../../services/key_derivation_helpers.dart';
 import '../../../../services/local_sql_service/local_sql_chats_service/local_chats_service.dart';
 import '../../../../services/local_sql_service/local_sql_messages_service/local_messages_service.dart';
 import '../../../../services/local_storage_service.dart';
@@ -22,13 +23,15 @@ import '../../../../services/local_storage_service.dart';
 class ChatRepository {
   final FireStoreChatService _firestoreChatService;
   final LocalStorageService _localStorageService;
-  final FireStoreUserService _fireStoreUserService; // Added user service
-  final encryptionService = EncryptionService();
+  final FireStoreUserService _fireStoreUserService;
+  final EncryptionService2 _encryptionService2;
   final localChatsService = LocalChatsService();
   final localMessagesService = LocalMessagesService();
   StreamSubscription<List<Chat>>? _firestoreChatsSubscription;
 // <chat-id, <SharedSecretKey, PublicKeyFriendTimeMadeAt>>
-  final Map<String, (SecretKey, DateTime)> _sharedSecretKeys = {};
+  final Map<String, (SecureKey, DateTime)> _sharedSecretKeysEncrypt = {};
+  final Map<String, (SecureKey, DateTime)> _sharedSecretKeysDecrypt = {};
+
   final List<StreamSubscription> _publicKeySubs = [];
   bool _isLoggedIn = true;
 
@@ -36,9 +39,12 @@ class ChatRepository {
     required FireStoreChatService firestoreChatService,
     required LocalStorageService localStorageService,
     required FireStoreUserService fireStoreUserService,
+    required EncryptionService2 encryptionService2,
   })  : _firestoreChatService = firestoreChatService,
         _localStorageService = localStorageService,
-        _fireStoreUserService = fireStoreUserService;
+        _fireStoreUserService = fireStoreUserService,
+        _encryptionService2 = encryptionService2;
+
 
 
 
@@ -64,6 +70,7 @@ class ChatRepository {
       id: chatId,
       people: [currentUserId, friendId],
       chatStartIn: DateTime.now().toUtc(),
+      startTheChatId: currentUserId,
     );
 
     // Create the chat document in Firestore.
@@ -74,19 +81,34 @@ class ChatRepository {
     if (myMapKeyPair == null) {
       throw StateError('No X25519 key pair found in local storage.');
     }
+
+
     // Create the starter message.
     final Message initialMessage = Message(
       id: '', // Firestore will generate a document id for the message.
       senderId: currentUserId,
-      encryptedData: await encryptionService.encryptMessageToMap(
-          await encryptionService.computedAesKey(
-              friendPublicKeyStr: friendKey,
-              chatId: chatId,
-              myMapKeyPair: myMapKeyPair),
-          firstMessage),
-      sentAt: DateTime.now().toUtc(),
+      encryptedData: _encryptionService2.encryptWithAead(
+         key: await _encryptionService2.deriveAeadKey(_encryptionService2.computeSessionKeys(
+              myMapKeyPair: myMapKeyPair,
+              friendPublicKey: friendKey,
+              isClient: true,
+          ).tx), plaintext: firstMessage
+      ),
+        sentAt: DateTime.now().toUtc(),
       chatId: chatId,
     );
+
+
+
+    //   await encryptionService.encryptMessageToMap(
+    //       await encryptionService.computedAesKey(
+    //           friendPublicKeyStr: friendKey,
+    //           chatId: chatId,
+    //           myMapKeyPair: myMapKeyPair),
+    //       firstMessage),
+    //   sentAt: DateTime.now().toUtc(),
+    //   chatId: chatId,
+    // );
 
     // Add the starter message to the 'messages' subCollection.
     await _firestoreChatService.addMessage(chatId, initialMessage);
@@ -109,13 +131,16 @@ class ChatRepository {
     final Message message = Message(
       id: '', // Firestore will generate a document id for the message.
       senderId: currentUserId,
-      encryptedData: await encryptionService.encryptMessageToMap(
-          _sharedSecretKeys[chatId]!.$1,
-          text),
+      encryptedData: _encryptionService2.encryptWithAead(key:  _sharedSecretKeysEncrypt[chatId]!.$1 , plaintext: text),
+
+      // await encryptionService.encryptMessageToMap(
+      //     _sharedSecretKeys[chatId]!.$1,
+      //     text),
       sentAt: DateTime.now().toUtc(),
       chatId: chatId,
     );
-
+    print("this is");
+    print( _sharedSecretKeysEncrypt[chatId]!.$1);
     // Add the starter message to the 'messages' subCollection.
     await _firestoreChatService.addMessage(chatId, message);
   }
@@ -174,15 +199,31 @@ class ChatRepository {
         }
         final secretKeySw = Stopwatch()..start();
 
-        final secretKey = await encryptionService.computedAesKey(
-          friendPublicKeyStr: publicKeyInfo['publicKey'],
-          chatId: chat.id,
-          myMapKeyPair: myKeyPair,
-        );
+        final sessionKeys = _encryptionService2.computeSessionKeys(
+            myMapKeyPair: myKeyPair, friendPublicKey: publicKeyInfo['publicKey'], isClient: chat.startTheChatId == currentUserId);
+        final rx = await _encryptionService2.deriveAeadKey(sessionKeys.rx);
+        final tx = await _encryptionService2.deriveAeadKey(sessionKeys.tx);
+        // final params = KeyDerivationParams(
+        //   friendPublicKey: publicKeyInfo['publicKey'],
+        //   chatId:          chat.id,
+        //   myKeyPairMap:    myKeyPair,
+        // );
+        //
+        // final secretKey =  await compute<
+        //     KeyDerivationParams,
+        //     SecretKey
+        // >(
+        //   deriveAesKeyInBackground,
+        //   params,
+        // );
         debugPrint('✈️ computedAesKey: ${secretKeySw.elapsedMilliseconds} ms');
         secretKeySw.reset();
-        _sharedSecretKeys[chat.id] = (
-        secretKey,
+        _sharedSecretKeysDecrypt[chat.id] = (
+        rx,
+        publicKeyInfo['Date'] as DateTime,
+        );
+        _sharedSecretKeysEncrypt[chat.id] = (
+        tx,
         publicKeyInfo['Date'] as DateTime,
         );
 
@@ -212,16 +253,18 @@ class ChatRepository {
 
       print("message received");
       print(message.sentAt.toString());
-      print(_sharedSecretKeys[message.chatId]?.$2);
+      print(_sharedSecretKeysDecrypt[message.chatId]?.$2);
       print( message.sentAt.isAfter(myKeyTime));
       print("/////////////////////////");
 
-      if (message.sentAt.isAfter(_sharedSecretKeys[message.chatId]!.$2) &&
+      if (message.sentAt.isAfter(_sharedSecretKeysDecrypt[message.chatId]!.$2) &&
           message.sentAt.isAfter(myKeyTime)) {
-        SecretBox secretBox =
-            encryptionService.secretBoxFromMap(message.encryptedData);
-        String textMessage = await encryptionService.decryptMessage(
-            _sharedSecretKeys[message.chatId]!.$1, secretBox);
+        String textMessage = _encryptionService2.decryptWithAead(
+          key: message.senderId == myUserId
+              ? _sharedSecretKeysEncrypt[message.chatId]!.$1
+              : _sharedSecretKeysDecrypt[message.chatId]!.$1,
+          combinedBase64: message.encryptedData,
+        );
         LocalMessage localMessage = LocalMessage(
           id: message.id,
           senderId: message.senderId,

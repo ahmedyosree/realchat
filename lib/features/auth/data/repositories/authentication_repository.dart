@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/encryption_service.dart';
+import '../../../../services/encryption_service2.dart';
 import '../../../../services/firebase_firestore_user_service.dart';
 import '../../../../core/exceptions/auth_exception.dart';
 import '../../../../core/models/user.dart';
@@ -20,17 +21,20 @@ class GoogleSignInResult {
 /// Authentication repository responsible for handling user authentication,
 /// registration, and session management.
 class AuthenticationRepository {
-  final encryptionService = EncryptionService();
+
   final FirebaseAuthService _firebaseAuthService;
   final LocalStorageService _localStorageService;
   final FireStoreUserService _fireStoreService;
+  final EncryptionService2 _encryptionService2;
   AuthenticationRepository({
     required FirebaseAuthService firebaseAuthService,
     required LocalStorageService localStorageService,
     required FireStoreUserService fireStoreService,
+    required EncryptionService2 encryptionService2,
   })  : _firebaseAuthService = firebaseAuthService,
         _localStorageService = localStorageService,
-        _fireStoreService = fireStoreService;
+        _fireStoreService = fireStoreService,
+        _encryptionService2 = encryptionService2;
 
   /// Signs in a user using email and password.
   /// Fetches user data from Firestore and caches it locally.
@@ -46,9 +50,10 @@ class AuthenticationRepository {
       );
       final keyPairMap = await _localStorageService.getKeyPair();
       if(keyPairMap == null){
-        final myKeyPair = await encryptionService.generateKeyPair();
-        final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
-        final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+        final myKeyPair =  _encryptionService2.generateKeyPair();
+
+        final myPublicKey =  _encryptionService2.publicKeyToBase64(myKeyPair);
+        final mapKeyPair =  _encryptionService2.serializeKeyPair(myKeyPair);
         await _localStorageService.saveKeyPair(mapKeyPair);
 
         await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKeyInfo", value:  {
@@ -86,9 +91,9 @@ class AuthenticationRepository {
       if (firebaseUser == null) return null;
       print("object1");
 
-      final myKeyPair = await encryptionService.generateKeyPair();
-      final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
-      final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+      final myKeyPair =  _encryptionService2.generateKeyPair();
+      final myPublicKey =  _encryptionService2.publicKeyToBase64(myKeyPair);
+      final mapKeyPair =  _encryptionService2.serializeKeyPair(myKeyPair);
       await _localStorageService.saveKeyPair(mapKeyPair);
       print("object2");
 
@@ -135,9 +140,9 @@ class AuthenticationRepository {
         throw AuthException("Nickname already exists , try another one", "nickname-already-in-use");
       }
 
-      final myKeyPair = await encryptionService.generateKeyPair();
-      final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
-      final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+      final myKeyPair = await _encryptionService2.generateKeyPair();
+      final myPublicKey = await _encryptionService2.publicKeyToBase64(myKeyPair);
+      final mapKeyPair = await _encryptionService2.serializeKeyPair(myKeyPair);
       await _localStorageService.saveKeyPair(mapKeyPair);
 
       UserModel user;
@@ -190,9 +195,9 @@ class AuthenticationRepository {
 
       final keyPairMap = await _localStorageService.getKeyPair();
       if(keyPairMap == null){
-        final myKeyPair = await encryptionService.generateKeyPair();
-        final myPublicKey = await encryptionService.getPublicKeyString(myKeyPair);
-        final mapKeyPair = await encryptionService.keyPairToMap(myKeyPair);
+        final myKeyPair = await _encryptionService2.generateKeyPair();
+        final myPublicKey = await _encryptionService2.publicKeyToBase64(myKeyPair);
+        final mapKeyPair = await _encryptionService2.serializeKeyPair(myKeyPair);
         await _localStorageService.saveKeyPair(mapKeyPair);
 
         await _fireStoreService.updateDocumentField(docId: firebaseUser.uid, field: "publicKeyInfo", value:  {

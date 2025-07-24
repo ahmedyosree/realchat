@@ -7,7 +7,6 @@ import '../core/models/user.dart';
 /// Service for local storage (SharedPreferences)
 class LocalStorageService {
   final SharedPreferences _prefs;
-  static const _sharedSecretsPrefsKey = 'sharedSecrets';
 
   LocalStorageService(this._prefs);
 

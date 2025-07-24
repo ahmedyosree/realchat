@@ -4,11 +4,13 @@ class Chat extends Equatable {
   final String id;
   final List<String> people;
   final DateTime chatStartIn;
+  final String startTheChatId;
 
   const Chat({
     required this.id,
     required this.people,
     required this.chatStartIn,
+    required this.startTheChatId,
   });
 
   factory Chat.fromMap(Map<String, dynamic> map) {
@@ -16,6 +18,7 @@ class Chat extends Equatable {
       id: map['id'] as String,
       people: List<String>.from(map['people'] ?? []),
       chatStartIn: (map['chatStartIn'] as Timestamp).toDate().toLocal(),
+      startTheChatId: map['startTheChatId'] as String,
     );
   }
 
@@ -24,9 +27,10 @@ class Chat extends Equatable {
       'id': id,
       'people': people,
       'chatStartIn':FieldValue.serverTimestamp(),
+      'startTheChatId': startTheChatId,
     };
   }
 
   @override
-  List<Object> get props => [id, people, chatStartIn];
+  List<Object> get props => [id, people, chatStartIn , startTheChatId];
 }

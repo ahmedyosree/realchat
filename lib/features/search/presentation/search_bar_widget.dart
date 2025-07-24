@@ -12,18 +12,28 @@ class SearchBarWidget extends StatefulWidget {
 
 class _SearchBarWidgetState extends State<SearchBarWidget> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _focusNode = FocusNode();
+
 
   }
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _clearSearch() {
+    _controller.clear();
+    context.read<SearchBloc>().add(const SearchQueryChanged(''));
+    _focusNode.unfocus();
   }
 
   @override
@@ -49,7 +59,14 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: TextField(
         controller: _controller,
+        focusNode: _focusNode,
         autofocus: false,
+        onTap: () {
+          // Only request focus when the user taps the field.
+          if (!_focusNode.hasFocus) {
+            _focusNode.requestFocus();
+          }
+        },
 
         onChanged: (query) {
           context.read<SearchBloc>().add(SearchQueryChanged(query));
@@ -64,11 +81,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
-            onPressed: () {
-              _controller.clear();
-              context.read<SearchBloc>().add(const SearchQueryChanged(''));
-              FocusScope.of(context).unfocus();
-            },
+            onPressed: _clearSearch,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:realchat/services/encryption_service2.dart';
 import 'package:realchat/services/local_storage_service.dart';
 import 'package:realchat/features/auth/data/services/firebase_authentication_service.dart';
 import 'package:realchat/services/firebase_firestore_chat_service.dart';
@@ -11,8 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/firebase_firestore_user_service.dart';
 import 'app/my_app.dart';
 import 'core/constants/firebase_options.dart';
-import 'core/auth_bloc_observer.dart';
-
+import 'core/BlocObserver/bloc_observer.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,8 @@ void main() async {
 
   final fireStoreService = FireStoreUserService(firestore: firestore);
   final fireStoreChatService = FireStoreChatService(firestore: firestore);
-
+  final sodium = await SodiumInit.init();
+final encryptionService2 = EncryptionService2(sodium);
 
 
   runApp(MyApp(
@@ -34,6 +36,7 @@ void main() async {
     firebaseAuthService: firebaseAuthService,
     fireStoreService: fireStoreService,
     fireStoreChatService: fireStoreChatService,
+    encryptionService2: encryptionService2,
 
   ));
 

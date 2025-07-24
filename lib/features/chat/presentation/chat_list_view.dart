@@ -50,6 +50,7 @@ class ChatListWidget extends StatelessWidget {
                 chatPreview: chatPreview,
                 myId: myId,
                 onTap: () {
+                  FocusScope.of(context).unfocus();
                   context.push('/messages');
                   context.read<ChatBloc>().add(GetMessagesEvent(
                     chatPreview.chatId,

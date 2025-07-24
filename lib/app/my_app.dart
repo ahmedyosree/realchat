@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realchat/services/firebase_firestore_user_service.dart';
-
 import '../features/auth/data/repositories/authentication_repository.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/bloc/auth_event.dart';
@@ -10,6 +9,7 @@ import '../features/chat/data/repositories/chat_repositories.dart';
 import '../features/search/bloc/search_bloc.dart';
 import '../features/search/data/repositories/search_repository.dart';
 import '../router/app_router.dart';
+import '../services/encryption_service2.dart';
 import '../services/firebase_firestore_chat_service.dart';
 import '../services/local_storage_service.dart';
 import '../features/auth/data/services/firebase_authentication_service.dart';
@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   final FirebaseAuthService firebaseAuthService;
   final FireStoreUserService fireStoreService;
   final FireStoreChatService fireStoreChatService;
+  final EncryptionService2 encryptionService2;
 
   const MyApp({
     super.key,
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
     required this.firebaseAuthService,
     required this.fireStoreService,
     required this.fireStoreChatService,
+    required this.encryptionService2,
   });
 
   @override
@@ -38,6 +40,7 @@ class MyApp extends StatelessWidget {
               firebaseAuthService: firebaseAuthService,
               localStorageService: localStorageService,
               fireStoreService: fireStoreService,
+              encryptionService2: encryptionService2,
             ),
           )..add(CheckUserSession()),
         ),
@@ -54,6 +57,7 @@ class MyApp extends StatelessWidget {
               firestoreChatService: fireStoreChatService,
               localStorageService: localStorageService,
               fireStoreUserService: fireStoreService,
+                encryptionService2 : encryptionService2,
             )
         ),
         ),],

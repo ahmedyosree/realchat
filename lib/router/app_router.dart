@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/view/SplashScreen.dart';
-import '../features/auth/presentation/view/home_page.dart';
+import '../features/home/presentation/home_page.dart';
 import '../features/auth/presentation/view/login_page.dart';
 import '../features/auth/presentation/view/setup_profile_page.dart';
 import '../features/auth/presentation/view/signup_page.dart';

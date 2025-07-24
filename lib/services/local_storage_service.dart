@@ -1,7 +1,6 @@
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../core/models/user.dart';
 
 /// Service for local storage (SharedPreferences)
@@ -11,8 +10,6 @@ class LocalStorageService {
   LocalStorageService(this._prefs);
 
   Future<void> saveUser(UserModel user) async {
-
-
     await _prefs.setString('userData', json.encode( {
       'id': user.id,
       'email': user.email,

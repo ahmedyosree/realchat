@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import '../../../core/models/Local_Message.dart';
 import '../local_sql_chats_service/local_chats_service.dart';
-
+// Import platform-specific database opener
 import 'local_messages_service_mobile.dart'
 if (dart.library.html) 'local_messages_service_web.dart';
 
@@ -40,7 +40,7 @@ class LocalMessagesService {
 
   factory LocalMessagesService() => _instance;
   LocalMessagesService._internal() : _db = LocalMessagesDatabase();
-
+  // Inserts or updates a message
   Future<void> saveMessage(LocalMessage msg) {
     return _db.into(_db.messageTable).insertOnConflictUpdate(
       MessageTableCompanion(
@@ -52,7 +52,7 @@ class LocalMessagesService {
       ),
     );
   }
-
+// Gets the DateTime of the most recent message in a chat
   Future<DateTime?> getMostRecentMessageTime(String chatId) async {
     final query = _db.select(_db.messageTable)
       ..where((tbl) => tbl.chatId.equals(chatId))
@@ -63,7 +63,7 @@ class LocalMessagesService {
     return row?.sentAt;
   }
 
-  // Watch messages stream for a specific chat
+  // Streams all messages for a given chat
   Stream<List<LocalMessage>> watchMessagesForChat(String chatId) {
     final query = _db.select(_db.messageTable)
       ..where((tbl) => tbl.chatId.equals(chatId))
@@ -84,7 +84,6 @@ class LocalMessagesService {
 
   /// Emits a list containing, for each distinct chatId, the single message
   /// whose sentAt is the most recent.
-  // --- New function: Stream of latest message for each chat ---
   Stream<List<LocalMessage>> watchLatestMessagesForAllChats() {
     final latestQuery = _db.customSelect(
       '''

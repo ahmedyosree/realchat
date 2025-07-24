@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
-import '../../../chat/bloc/chat_bloc.dart';
-import '../../../chat/presentation/chat_list_view.dart';
-import '../../../search/presentation/search_bar_widget.dart';
-import '../../bloc/auth_bloc.dart';
-import '../../bloc/auth_event.dart';
-import '../../bloc/auth_state.dart';
+import '../../chat/bloc/ChatOverviewBloc/chat_bloc.dart';
+import '../../chat/presentation/chat_list_view.dart';
+import '../../search/presentation/search_bar_widget.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../auth/bloc/auth_event.dart';
+import '../../auth/bloc/auth_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,10 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // as soon as the widget is “inited”, fire your chat-loading event:
+
     context.read<ChatBloc>().add(GetChatsEvent());
     FlutterNativeSplash.remove();
-
   }
 
   @override
@@ -40,9 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),
-              tooltip: 'Logout', // Add tooltip for better accessibility
+              tooltip: 'Logout',
               onPressed: () {
-                // Add confirmation dialog
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -58,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.pop(context);
                           context.read<ChatBloc>().add(StopGettingChatsEvent());
                           context.read<AuthBloc>().add(SignOutEvent());
-
                         },
                         child: const Text('Logout'),
                       ),
@@ -76,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBody(BuildContext context) {
     final user = context.select((AuthBloc bloc) =>
-    bloc.state is AuthSuccess ? (bloc.state as AuthSuccess).user : null);
+        bloc.state is AuthSuccess ? (bloc.state as AuthSuccess).user : null);
 
     if (user == null) {
       return const Center(
@@ -121,8 +118,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         _buildUserInfoItem('Name', user.name),
                         const SizedBox(height: 8),
-                         _buildUserInfoItem('Nickname', user.nickname),
-                            // You could also use SizedBox(width: 8) for spacing
+                        _buildUserInfoItem('Nickname', user.nickname),
+                        // You could also use SizedBox(width: 8) for spacing
                         const SizedBox(height: 4),
                         const Text(
                           '*This is the name people will use to search for you.',
@@ -132,17 +129,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontStyle: FontStyle.italic,
                           ),
                         ),
-
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                Column(
+                const Column(
                   children: [
-                    // Remove explicit title - use visual hierarchy instead
-                    const SizedBox(height: 16), // Add some top padding
+                    SizedBox(height: 16),
                     ChatListWidget(),
                   ],
                 )

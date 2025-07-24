@@ -11,7 +11,7 @@ part 'local_chats_service.g.dart';
 
 class ChatTable extends Table {
   TextColumn get id => text()();
-  TextColumn get people => text()(); // Store as JSON string
+  TextColumn get people => text()();
   DateTimeColumn get chatStartedAt => dateTime()();
   TextColumn get startTheChatId => text()();
 
@@ -38,7 +38,7 @@ class LocalChatsService {
   factory LocalChatsService() => _instance;
 
   LocalChatsService._internal() : _db = LocalChatsDatabase();
-
+  // Inserts or updates a chat
   Future<void> addChat(Chat chat) async {
     await _db.into(_db.chatTable).insertOnConflictUpdate(
       ChatTableCompanion(
@@ -49,7 +49,7 @@ class LocalChatsService {
       ),
     );
   }
-
+  // Gets the DateTime of the most recent chat
   Future<DateTime?> getMostRecentChatTime() async {
     final result = await (_db.selectOnly(_db.chatTable)
       ..addColumns([_db.chatTable.chatStartedAt])
@@ -60,6 +60,7 @@ class LocalChatsService {
     return result?.read(_db.chatTable.chatStartedAt);
   }
 
+  // Streams list of chats as Chat objects
   Stream<List<Chat>> getChatsStream() {
     return _db.select(_db.chatTable).watch().map((rows) {
       return rows.map((row) {
@@ -74,6 +75,7 @@ class LocalChatsService {
     });
   }
 
+  // Fetches a chat by its ID
   Future<Chat?> getChatById(String id) async {
     final row = await (_db.select(_db.chatTable)
       ..where((tbl) => tbl.id.equals(id)))

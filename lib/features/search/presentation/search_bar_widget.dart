@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/user.dart';
-import '../../chat/bloc/chat_bloc.dart';
+import '../../chat/bloc/ChatOverviewBloc/chat_bloc.dart';
 import '../bloc/search_bloc.dart';
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -62,7 +62,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         focusNode: _focusNode,
         autofocus: false,
         onTap: () {
-          // Only request focus when the user taps the field.
+
           if (!_focusNode.hasFocus) {
             _focusNode.requestFocus();
           }
@@ -74,9 +74,9 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         decoration: InputDecoration(
           hintText: "Enter your friend's nickname...",
           hintStyle: const TextStyle(
-            fontSize: 12, // Make it smaller
-            color: Colors.blueGrey, // Change the color
-            // You can add more properties here, e.g., fontWeight: FontWeight.w400
+            fontSize: 12,
+            color: Colors.blueGrey,
+
           ),
           prefixIcon: const Icon(Icons.search),
           suffixIcon: IconButton(
@@ -203,12 +203,12 @@ class _SearchResults extends StatelessWidget {
                   FocusScope.of(context).unfocus();
                   final TextEditingController controller = TextEditingController();
 
-                  // Open a bottom sheet to prompt for the first message.
+
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
                     builder: (context) {
-                      // Use a controller to capture the user's input.
+
                       return Padding(
                         padding: MediaQuery.of(context).viewInsets,
                         child: Padding(
@@ -238,9 +238,7 @@ class _SearchResults extends StatelessWidget {
                                         friendKey: friendKey,
                                       ),
                                     );
-                                    // Optionally, navigate to your chat screen using go_router here.
-                                    // For example:
-                                    // context.go('/chat/$friendId');
+
                                     Navigator.of(context).pop(); // Close the bottom sheet.
                                   }
 

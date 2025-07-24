@@ -1,109 +1,111 @@
-//
-// import 'dart:convert';
-// import 'dart:math';
-// import 'package:cryptography/cryptography.dart';
-//
-//
-// /// A singleton service for end-to-end encryption using X25519 + AES-GCM.
-// class EncryptionService {
-//   // Private constructor
-//   EncryptionService._privateConstructor();
-//
-//   // The single instance of the service
-//   static final EncryptionService _instance = EncryptionService._privateConstructor();
-//
-//   /// Factory constructor returns the same instance every time.
-//   factory EncryptionService() => _instance;
-//
-//   final X25519 algorithm = X25519();
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//   ///Computes and returns the AES-GCM key for a chat.
-//   Future<SecretKey> computedAesKey({
-//     required String friendPublicKeyStr,
-//     required String chatId,
-//     required Map<String, String> myMapKeyPair
-//   }) async {
-//
-//     final SimpleKeyPairData keyPairData =
-//     await mapToKeyPair(myMapKeyPair);
-//
-//     final SecretKey sharedSecret = await computeSharedSecret(
-//       myKeyPair: keyPairData,
-//       friendPublicKeyStr: friendPublicKeyStr,
-//     );
-//     final aesKey = await deriveAesKey(sharedSecret);
-//
-//
-//     return aesKey;
-//   }
-//
-//   /// Converts a [SecretKey] to a base64-encoded string for storage.
-//   Future<String> secretKeyToString(SecretKey key) async {
-//     final keyData = await key.extract(); // SecretKeyData
-//     return base64Encode(keyData.bytes);
-//   }
-//
-//   /// Imports a base64-encoded string back into a [SecretKey].
-//   Future<SecretKey> importSecretKey(String base64Key) async {
-//     final bytes = base64Decode(base64Key);
-//     return SecretKey(bytes);
-//   }
-//
-//
-//   /// Encrypts the plainText using AES-GCM and returns a SecretBox containing ciphertext, nonce, and MAC.
-//   Future<SecretBox> encryptMessage(SecretKey aesKey, String plainText) async {
-//     final aesGcm = AesGcm.with256bits();
-//     final nonce = List<int>.generate(12, (_) => Random.secure().nextInt(256));
-//     final secretBox = await aesGcm.encrypt(
-//       utf8.encode(plainText),
-//       secretKey: aesKey,
-//       nonce: nonce,
-//     );
-//     return secretBox;
-//   }
-//
-//   /// Decrypts the SecretBox to retrieve the clear-text message.
-//   Future<String> decryptMessage(SecretKey aesKey, SecretBox secretBox) async {
-//     final aesGcm = AesGcm.with256bits();
-//     final clearText = await aesGcm.decrypt(
-//       secretBox,
-//       secretKey: aesKey,
-//     );
-//     return utf8.decode(clearText);
-//   }
-//
-//   /// Serializes a SecretBox into a Map that can be stored in Firestore.
-//   Map<String, dynamic> secretBoxToMap(SecretBox secretBox) {
-//     return {
-//       'cipherText': base64Encode(secretBox.cipherText),
-//       'nonce': base64Encode(secretBox.nonce),
-//       'mac': base64Encode(secretBox.mac.bytes),
-//     };
-//   }
-//
-//   /// Deserializes the map from Firestore back into a SecretBox.
-//   SecretBox secretBoxFromMap(Map<String, dynamic> map) {
-//     return SecretBox(
-//       base64Decode(map['cipherText'] as String),
-//       nonce: base64Decode(map['nonce'] as String),
-//       mac: Mac(base64Decode(map['mac'] as String)),
-//     );
-//   }
-//   /// Encrypts the plainText using AES-GCM and returns a SecretBox containing ciphertext, nonce, and MAC.
-//   /// then Serializes a SecretBox into a Map that can be stored in Firestore.
-//   Future<Map<String, dynamic>> encryptMessageToMap(
-//       SecretKey aesKey,
-//       String plainText,
-//       ) async {
-//     final secretBox = await encryptMessage(aesKey, plainText);
-//     return secretBoxToMap(secretBox);
-//   }
-// }
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:sodium/sodium.dart';
+
+/// Provides X25519 key exchange and XChaCha20-Poly1305-IETF authenticated encryption using libsodium.
+class EncryptionService {
+  final Sodium sodium;
+
+  EncryptionService(this.sodium);
+
+  /// Generates an X25519 key pair
+  KeyPair generateKeyPair() => sodium.crypto.box.keyPair();
+
+  /// Encodes a public key as base64 string
+  String publicKeyToBase64(KeyPair keyPair) => base64Encode(keyPair.publicKey);
+
+  /// Decodes a base64-encoded public key into raw bytes
+  Uint8List importPublicKey(String base64Key) => base64Decode(base64Key);
+
+  /// Serializes a [KeyPair] to a map of Base64-encoded strings
+  Map<String, String> serializeKeyPair(KeyPair keyPair) => {
+        'publicKey': base64Encode(keyPair.publicKey),
+        'secretKey': keyPair.secretKey.runUnlockedSync((Uint8List bytes) {
+          return base64Encode(bytes);
+        }),
+      };
+
+  /// Deserializes a map of Base64 strings back to a [KeyPair]
+  KeyPair deserializeKeyPair(
+    Map<String, String> serialized,
+  ) =>
+      KeyPair(
+        publicKey: base64Decode(serialized['publicKey']!),
+        secretKey: sodium.secureCopy(
+          base64Decode(serialized['secretKey']!),
+        ),
+      );
+
+  /// Computes session keys using X25519 key exchange (client/server mode)
+  SessionKeys computeSessionKeys({
+    required Map<String, String> myMapKeyPair,
+    required String friendPublicKey,
+    required bool isClient,
+  }) {
+    KeyPair myKeyPair = deserializeKeyPair(myMapKeyPair);
+    if (isClient) {
+      return sodium.crypto.kx.clientSessionKeys(
+        clientPublicKey: myKeyPair.publicKey,
+        clientSecretKey: myKeyPair.secretKey,
+        serverPublicKey: importPublicKey(friendPublicKey),
+      );
+    } else {
+      return sodium.crypto.kx.serverSessionKeys(
+        serverPublicKey: myKeyPair.publicKey,
+        serverSecretKey: myKeyPair.secretKey,
+        clientPublicKey: importPublicKey(friendPublicKey),
+      );
+    }
+  }
+
+  /// Derives 32-byte AEAD key from session key using HKDF
+  Future<SecureKey> deriveAeadKey(SecureKey sessionKey) async {
+    return sodium.crypto.kdf.deriveFromKey(
+        masterKey: sessionKey,
+        context: "Chacha20",
+        subkeyId: BigInt.from(1),
+        subkeyLen: 32);
+  }
+
+  /// Encrypts text with XChaCha20-Poly1305-IETF, returns base64
+  String encryptWithAead({
+    required SecureKey key,
+    required String plaintext,
+  }) {
+    final nonce = sodium.randombytes.buf(
+      sodium.crypto.aeadXChaCha20Poly1305IETF.nonceBytes,
+    );
+
+    final message = Uint8List.fromList(utf8.encode(plaintext));
+
+    final combinedCipher = sodium.crypto.aeadXChaCha20Poly1305IETF.encrypt(
+      message: message,
+      nonce: nonce,
+      key: key,
+    );
+
+    final packed = Uint8List.fromList(nonce + combinedCipher);
+
+    return base64.encode(packed);
+  }
+
+  /// Decrypts base64 using XChaCha20-Poly1305-IETF
+  String decryptWithAead({
+    required SecureKey key,
+    required String combinedBase64,
+  }) {
+    final packed = base64.decode(combinedBase64);
+    final nonceLen = sodium.crypto.aeadXChaCha20Poly1305IETF.nonceBytes;
+
+    final nonce = packed.sublist(0, nonceLen);
+    final cipherWithTag = packed.sublist(nonceLen);
+
+    final plaintextBytes = sodium.crypto.aeadXChaCha20Poly1305IETF.decrypt(
+      cipherText: cipherWithTag,
+      nonce: nonce,
+      key: key,
+    );
+    return utf8.decode(plaintextBytes);
+  }
+}

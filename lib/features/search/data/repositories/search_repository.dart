@@ -37,13 +37,13 @@ class SearchRepository {
 
   /// Searches for users by nickname and returns a List<UserModel>
   Future<List<UserModel>> searchUsersByNickname(String query) async {
-    print("Cache size: ${users.length}");
+
     query = query.trim();
     try {
       // Filter local cache for users whose nickname starts with the query.
       var result =
       users.where((user) => user.nickname.startsWith(query)).take(3).toList();
-      print("Local filtered result count: ${result.length}");
+
 
       // Use hierarchical check: if a broader query is fully fetched, treat this one as fully fetched.
       if (isQueryFullyFetched(query)) {
@@ -83,12 +83,10 @@ class SearchRepository {
           }
         }
       }
-      print("Updated cache size: ${users.length}");
-      print("Final result count: ${result.length}");
+
 
       return result;
     } catch (e) {
-      print('Error fetching users: $e');
       return [];
     }
   }

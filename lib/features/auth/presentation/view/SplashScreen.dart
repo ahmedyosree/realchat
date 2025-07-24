@@ -4,7 +4,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/widgets/logo.dart';
-import '../../../chat/bloc/chat_bloc.dart';
+import '../../../chat/bloc/ChatOverviewBloc/chat_bloc.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_state.dart';
 
@@ -15,26 +15,26 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        print("is");
+
 
         if (state is AuthSuccess) {
-          print("whaaaart");
-          print("2");
+
+
           context.go('/home');
         } else if (state is AuthFailure) {
-          print("3");
+
           context.go('/login');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
         } else if (state is AuthInitial) {
-          print("4");
+
           context.go('/login');
 
 
         }
         else if (state is RegisterFailure) {
-          print("4.5");
+
           context.go('/login');
 
           context.push('/signup');

@@ -43,36 +43,3 @@ class GettingChatsFailure extends ChatState {
   List<Object> get props => [error];
 }
 
-
-class SendMessageFailure extends ChatState {
-  final String error;
-  const SendMessageFailure(this.error);
-
-  @override
-  List<Object> get props => [error];
-}
-
-class StartGettingMessages extends ChatState {
-  final List<LocalMessage> messages;
-  final String myId;
-  final String name;
-  final String nickname;
-  final String chatId;
-
-  const StartGettingMessages({this.messages = const [] , required this.myId , required this.name , required this.nickname , required this.chatId});
-
-  @override
-  List<Object> get props => [messages , myId , name , nickname , chatId];
-}
-
-class StopGettingMessages extends ChatState {
-  const StopGettingMessages();
-}
-
-class GettingMessagesFailure extends ChatState {
-  final String error;
-  const GettingMessagesFailure(this.error);
-
-  @override
-  List<Object> get props => [error];
-}

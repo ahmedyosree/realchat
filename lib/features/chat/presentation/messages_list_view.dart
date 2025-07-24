@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/models/Local_Message.dart';
-import '../bloc/chat_bloc.dart';
+import '../bloc/ChatMessagesBloc/message_bloc.dart';
 
 class ChatRoomScreen extends StatelessWidget {
   const ChatRoomScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatBloc, ChatState>(
-      // Only rebuild when we enter the loading or failure states:
+    return BlocBuilder<MessageBloc, MessageState>(
+
       buildWhen: (previous, current) {
         return current is StartGettingMessages
             || current is GettingMessagesFailure;
@@ -24,8 +24,7 @@ class ChatRoomScreen extends StatelessWidget {
             body: Center(child: Text('Error: ${state.error}')),
           );
         }
-        // this fallback will never be shown if buildWhen blocks
-        // all other states—but you can keep it as a safety net:
+
         return const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         );
@@ -35,14 +34,14 @@ class ChatRoomScreen extends StatelessWidget {
 
   Scaffold _buildChatScreen(StartGettingMessages state, BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5), // Soft light background
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         elevation: 1,
         backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            context.read<ChatBloc>().add(StopGettingMessagesEvent());
+            context.read<MessageBloc>().add(StopGettingMessagesEvent());
             context.pop();
           },
         ),
@@ -139,7 +138,7 @@ _MessageInput(this.chatId);
                     onPressed: () {
                       final text = _controller.text.trim();
                       if (text.isNotEmpty) {
-                        context.read<ChatBloc>().add(SendMessage(text , chatId));
+                        context.read<MessageBloc>().add(SendMessage(text , chatId));
                         _controller.clear();
                       }
                     },

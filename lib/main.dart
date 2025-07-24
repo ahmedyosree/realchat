@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:realchat/services/encryption_service2.dart';
+import 'package:realchat/services/encryption_service.dart';
 import 'package:realchat/services/local_storage_service.dart';
 import 'package:realchat/features/auth/data/services/firebase_authentication_service.dart';
 import 'package:realchat/services/firebase_firestore_chat_service.dart';
@@ -28,7 +28,7 @@ void main() async {
   final fireStoreService = FireStoreUserService(firestore: firestore);
   final fireStoreChatService = FireStoreChatService(firestore: firestore);
   final sodium = await SodiumInit.init();
-final encryptionService2 = EncryptionService2(sodium);
+final encryptionService = EncryptionService(sodium);
 
 
   runApp(MyApp(
@@ -36,7 +36,7 @@ final encryptionService2 = EncryptionService2(sodium);
     firebaseAuthService: firebaseAuthService,
     fireStoreService: fireStoreService,
     fireStoreChatService: fireStoreChatService,
-    encryptionService2: encryptionService2,
+    encryptionService: encryptionService,
 
   ));
 

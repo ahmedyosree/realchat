@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:realchat/core/models/chat_preview.dart';
-import '../bloc/chat_bloc.dart';
+import '../bloc/ChatMessagesBloc/message_bloc.dart';
+import '../bloc/ChatOverviewBloc/chat_bloc.dart';
 
 class ChatListWidget extends StatelessWidget {
   const ChatListWidget({super.key});
@@ -52,7 +53,7 @@ class ChatListWidget extends StatelessWidget {
                 onTap: () {
                   FocusScope.of(context).unfocus();
                   context.push('/messages');
-                  context.read<ChatBloc>().add(GetMessagesEvent(
+                  context.read<MessageBloc>().add(GetMessagesEvent(
                     chatPreview.chatId,
                     chatPreview.name,
                     chatPreview.nickname,

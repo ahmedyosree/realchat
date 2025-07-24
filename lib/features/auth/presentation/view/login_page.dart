@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -9,7 +7,6 @@ import '../../../../core/constants/widgets/auth_button.dart';
 import '../../../../core/constants/widgets/auth_text_field.dart';
 import '../../../../core/constants/widgets/logo.dart';
 import '../../../../core/constants/widgets/social_login_button.dart';
-import '../../../chat/bloc/chat_bloc.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
@@ -38,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    FlutterNativeSplash.remove(); // This will now execute after the 3-second delay
+    FlutterNativeSplash.remove();
 
   }
 
@@ -54,14 +51,14 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          print("5");
+
           if (state is AuthLoading) {
-            print("6");
+
             context.push('/');
           }
 
           if (state is AuthSuccess) {
-            print("7");
+
             context.go('/home');
             if (state.welcomeMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -70,17 +67,17 @@ class _LoginScreenState extends State<LoginScreen> {
             }
 
           } else if (state is AddInfo) {
-            print("8");
+
             context.push('/addinfo');
 
           }
           else if (state is AuthFailure) {
-            print("9");
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
           }else if (state is AuthInitial) {
-            print("9.5");
+
             context.go('/login');
 
           }

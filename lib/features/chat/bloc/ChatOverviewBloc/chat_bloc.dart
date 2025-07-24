@@ -1,11 +1,9 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
-import 'package:realchat/core/models/Local_Message.dart';
-import '../../../core/models/chat_preview.dart';
-import '../data/repositories/chat_repositories.dart';
+import '../../../../core/models/chat_preview.dart';
+import '../../data/repositories/chat_repositories.dart';
 
 part 'chat_event.dart';
 part 'chat_state.dart';
@@ -13,7 +11,6 @@ part 'chat_state.dart';
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository chatRepository;
   StreamSubscription<List<ChatPreview>>? _chatsSubscription;
-  StreamSubscription<List<LocalMessage>>? _messagesSubscription;
 
 
   ChatBloc({required this.chatRepository}) : super(ChatInitial()) {
@@ -26,13 +23,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     });
 
 
-    on<GetMessagesEvent>(_onGetMessages);
-    on<StopGettingMessagesEvent>(_onStopGettingMessages);
-    on<MessagesUpdated>(_onMessagesUpdated);
-    on<MessagesError>((event, emit) {
-      emit(GettingMessagesFailure(event.error));
-    });
-    on<SendMessage>(_onSendMessage);
 
   }
 
@@ -88,66 +78,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  Future<void> _onSendMessage(
-      SendMessage event,
-      Emitter<ChatState> emit,
-      ) async {
-    try {
-      await chatRepository.addNewMessage(event.text, event.chatId);
-    } catch (error) {
-
-      emit(SendMessageFailure(error.toString()));
-    }
-  }
-
-  Future<void> _onGetMessages(
-      GetMessagesEvent event,
-      Emitter<ChatState> emit,
-      ) async {
-    // Cancel any previous subscription to prevent duplicate listeners
-    await _messagesSubscription?.cancel();
-
-
-    // Listen to SQLite for real-time UI updates via stream
-    _messagesSubscription = chatRepository.watchMessagesForChat(event.chatId).listen(
-          (messages) => add(MessagesUpdated(messages, event.name , event.nickname , event.chatId)), // Dispatch event with new messages
-      onError: (error) => add(MessagesError(error.toString())),
-    );
-  }
-
-  Future<void> _onMessagesUpdated(
-      MessagesUpdated event,
-      Emitter<ChatState> emit,
-      ) async {
-    print("is do ???");
-    print(event.messages.length);
-
-    emit(StartGettingMessages(messages: event.messages , myId: chatRepository.myUserId , name: event.name , nickname: event.nickname , chatId: event.chatId));
-  }
-
-  Future<void> _onStopGettingMessages(
-      StopGettingMessagesEvent event,
-      Emitter<ChatState> emit,
-      ) async {
-    try {
-      await _messagesSubscription?.cancel();
-      _messagesSubscription = null;
-      emit(const StopGettingMessages());
-    } catch (e) {
-      emit(GettingMessagesFailure("Error stopping message sync: ${e.toString()}"));
-    }
-  }
-
-
-
   @override
   Future<void> close() {
     _chatsSubscription?.cancel();
-    _messagesSubscription?.cancel();
     return super.close();
   }
+
 
 }

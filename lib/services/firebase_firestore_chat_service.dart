@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rxdart/rxdart.dart';
-
 import '../core/models/chat.dart';
 import '../core/models/message.dart';
+
 class FireStoreChatService {
   final FirebaseFirestore _firestore;
   final String collectionPath = 'chats';

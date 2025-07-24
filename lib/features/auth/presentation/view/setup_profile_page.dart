@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../bloc/auth_bloc.dart';
@@ -27,14 +26,14 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       listener: (context, state) {
         if (state is AuthSuccess) {
           context.go('/home');
-          print("10");
+
         } else if (state is AuthFailure) {
-          print("11");
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
         } else if (state is AuthInitial) {
-          print("12");
+
           context.go('/login');
         }
       },

@@ -10,4 +10,6 @@ Features a search bar for finding friends and starting new chats, caching result
 Designed with dependency injection and clean-code best practices in a layered architecture (Service → Repository → Bloc → Presentation), with full offline support.
 
 Android_apk: https://github.com/ahmedyosree/realchat/releases/download/v1.0/app-release.apk 
-  web: https://realchat-89c04.web.app
+
+
+web: https://realchat-89c04.web.app

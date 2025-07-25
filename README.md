@@ -1,16 +1,13 @@
 # realchat
 
-A new Flutter project.
+RealChat
+End-to-end encrypted chat app built with Flutter, Firebase, Bloc, Drift and sodium; uses elliptic curve Diffie–Hellman for key exchange and ChaCha20-Poly1305 for authenticated encryption.
 
-## Getting Started
+Streams encrypted messages from Firestore in real time, decrypts and saves them to SQLite (Drift), then streams them from SQL to the UI via BLoC.
 
-This project is a starting point for a Flutter application.
+Features a search bar for finding friends and starting new chats, caching results locally to avoid redundant Firestore calls.
 
-A few resources to get you started if this is your first Flutter project:
+Designed with dependency injection and clean-code best practices in a layered architecture (Service → Repository → Bloc → Presentation), with full offline support.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Android_apk: https://github.com/ahmedyosree/realchat/releases/download/v1.0/app-release.apk 
+  web: https://realchat-89c04.web.app
